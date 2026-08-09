@@ -1,0 +1,13 @@
+scikit-learn
+pandas
+matplotlib
+requests
+scipy
+numpy
+rank_bm25
+# Required for llm_experiment.py's real (non-mock) run:
+anthropic
+openai
+# Optional, for a real dense embedding model instead of TF-IDF.
+# Uncomment and install if you want --embedder sentence-transformers:
+# sentence-transformers

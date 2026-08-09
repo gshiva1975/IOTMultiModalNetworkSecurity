@@ -1,0 +1,5 @@
+model_key,strategy,n_main_trials,n_holdout_trials,correct_citation_rate,correct_citation_ci_lo,correct_citation_ci_hi,invented_id_rate,invented_id_ci_lo,invented_id_ci_hi,abstention_rate,abstention_ci_lo,abstention_ci_hi,mean_cost_usd,mean_latency_s,mean_total_tokens,n_parse_errors
+claude,full_corpus,45,5,0.8444,0.7333,0.9333,0.0,0.0,0.0,0.8,0.4,1.0,0.010017,3.6049,2904.9,5
+claude,rag,45,5,0.8444,0.7333,0.9333,0.0,0.0,0.0,1.0,1.0,1.0,0.004979,3.6005,1233.9,1
+gpt4o-mini,full_corpus,45,5,0.9556,0.8889,1.0,0.0,0.0,0.0,0.4,0.0,0.8,0.000298,1.5147,1815.8,0
+gpt4o-mini,rag,45,5,0.8222,0.7111,0.9333,0.0,0.0,0.0,0.2,0.0,0.6,0.000142,1.8005,776.6,0

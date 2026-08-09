@@ -1,0 +1,5 @@
+model_key,strategy,n_ground_truth_trials,n_abstention_trials,correct_citation_rate,correct_citation_ci_lo,correct_citation_ci_hi,invented_id_rate,invented_id_ci_lo,invented_id_ci_hi,correctly_abstained_rate,correctly_abstained_ci_lo,correctly_abstained_ci_hi,mean_cost_usd,total_cost_usd,mean_latency_s,mean_total_tokens,n_parse_errors
+claude,full_corpus,607,560,0.5206,0.4811,0.5601,0.0,0.0,0.0,0.0214,0.0107,0.0339,0.011627,13.5684,5.1725,3287.0,62
+claude,rag,606,560,0.5017,0.462,0.5413,0.0,0.0,0.0,0.0161,0.0071,0.0268,0.006732,7.8494,4.5454,1684.8,37
+gpt4o-mini,full_corpus,760,600,0.3671,0.3329,0.4026,0.0,0.0,0.0,0.005,0.0,0.0117,0.000336,0.4572,1.5987,2072.4,0
+gpt4o-mini,rag,760,600,0.3684,0.3342,0.4026,0.0,0.0,0.0,0.0033,0.0,0.0083,0.000185,0.2519,1.1012,1067.7,0

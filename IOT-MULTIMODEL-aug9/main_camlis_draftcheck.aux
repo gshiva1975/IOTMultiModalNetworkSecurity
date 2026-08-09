@@ -1,0 +1,103 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{antonakakis2017understanding}
+\citation{kolias2017ddos}
+\citation{chandola2009anomaly}
+\citation{netflowviz}
+\citation{hallucve}
+\citation{proverag}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{netflowviz}
+\citation{hallucve}
+\citation{proverag}
+\citation{neto2023ciciot2023}
+\citation{antonakakis2017understanding}
+\citation{kolias2017ddos}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methodology}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Dataset and Sampling}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Visualization}{2}{subsection.3.2}\protected@file@percent }
+\citation{liu2008isolationforest}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Prompting Conditions}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Reference Corpus}{3}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:corpus}{{3.4}{3}{Reference Corpus}{subsection.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Citation-Quality / Hallucination Scoring}{3}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:scoring}{{3.5}{3}{Citation-Quality / Hallucination Scoring}{subsection.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Baseline Detectors}{3}{subsection.3.6}\protected@file@percent }
+\newlabel{sec:baselines}{{3.6}{3}{Baseline Detectors}{subsection.3.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Example traffic visualizations, one real sample per class, exactly as shown to the model. Volumetric floods (TCP, UDP) and the Mirai variant show visually obvious rate spikes and skewed protocol mix; DDoS-SlowLoris, a low-and-slow application-layer attack, is visually much closer to Benign --- consistent with the baseline-detector collapse on non-volumetric attacks reported in Section\nobreakspace  {}\ref  {sec:baselines}.\relax }}{4}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:sample_viz}{{1}{4}{Example traffic visualizations, one real sample per class, exactly as shown to the model. Volumetric floods (TCP, UDP) and the Mirai variant show visually obvious rate spikes and skewed protocol mix; DDoS-SlowLoris, a low-and-slow application-layer attack, is visually much closer to Benign --- consistent with the baseline-detector collapse on non-volumetric attacks reported in Section~\ref {sec:baselines}.\relax }{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{4}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Classification Accuracy}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Citation Quality}{4}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:citation-quality}{{4.2}{4}{Citation Quality}{subsection.4.2}{}}
+\citation{gpt4o}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Overall classification accuracy by condition, with Wilson score 95\% confidence intervals. Intervals are wide relative to point estimates because $n{=}170$ per condition is small for a 34-way classification task.\relax }}{5}{table.caption.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Classification accuracy by attack category and condition (excludes the 3 parsing-artifact rows).\relax }}{5}{table.caption.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Baseline Detector Comparison}{5}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Cross-Model Comparison (GPT-4o)}{5}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:cross-model}{{4.4}{5}{Cross-Model Comparison (GPT-4o)}{subsection.4.4}{}}
+\citation{hallucve}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Claude classification accuracy by attack category and prompting condition. Accuracy is at or near 100\% for every category in every condition, including categories where the classical baselines in Figure\nobreakspace  {}\ref  {fig:baseline_vs_llm} fail almost completely.\relax }}{6}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:accuracy_by_category}{{2}{6}{Claude classification accuracy by attack category and prompting condition. Accuracy is at or near 100\% for every category in every condition, including categories where the classical baselines in Figure~\ref {fig:baseline_vs_llm} fail almost completely.\relax }{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{6}{section.5}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{6}{Discussion}{section.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Final citation quality by condition, fully resolved (out of 170 responses per condition). Zero fabricated (non-existent) reference IDs were found in any condition.\relax }}{7}{table.caption.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Citation correctness rate among non-benign attack samples, with Wilson 95\% confidence intervals. RAG's lower raw correct-rate is driven by its high no-citation rate, not by incorrect citations --- RAG's wrong-family rate (18.8\%) is in fact the lowest of the three conditions.\relax }}{7}{table.caption.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{7}{section.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Citation quality by condition, all 39 distinct reference IDs independently verified against MITRE/NVD. RAG-grounded's large ``no-citation'' segment (68/170) reflects the model correctly declining to cite when the retrieved reference set does not cover the observed class.\relax }}{8}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:citation_quality}{{3}{8}{Citation quality by condition, all 39 distinct reference IDs independently verified against MITRE/NVD. RAG-grounded's large ``no-citation'' segment (68/170) reflects the model correctly declining to cite when the retrieved reference set does not cover the observed class.\relax }{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Overall baseline detector performance (binary attack-vs-benign), $n{=}1{,}360$.\relax }}{9}{table.caption.9}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Baseline detector recall by attack category.\relax }}{9}{table.caption.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Exact Prompt Templates}{9}{appendix.A}\protected@file@percent }
+\newlabel{app:prompts}{{A}{9}{Exact Prompt Templates}{appendix.A}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Claude Sonnet 5 vs.\ GPT-4o, both at $n{=}5$/class (170 samples, 95\% Wilson CIs in brackets). ``Correct-cite\%'' is the real-and-correct citation rate among the 165 non-benign attack samples per condition.\relax }}{10}{table.caption.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Complete Verified Reference Corpus}{10}{appendix.B}\protected@file@percent }
+\newlabel{app:corpus}{{B}{10}{Complete Verified Reference Corpus}{appendix.B}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The \texttt  {Rate} feature (packets/sec, averaged per 30-row window) over the first 60 windows of the raw capture, for Benign traffic and four DDoS attack types. TCP, UDP, and SYN floods elevate Rate roughly one to two orders of magnitude above the benign baseline, which is exactly the signal a per-feature z-score or Isolation Forest threshold can exploit. DDoS-HTTP\_Flood and DDoS-SlowLoris, by contrast, have Rate values statistically indistinguishable from benign traffic --- both are low-and-slow, application-layer attacks.\relax }}{11}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:rate_comparison}{{4}{11}{The \code {Rate} feature (packets/sec, averaged per 30-row window) over the first 60 windows of the raw capture, for Benign traffic and four DDoS attack types. TCP, UDP, and SYN floods elevate Rate roughly one to two orders of magnitude above the benign baseline, which is exactly the signal a per-feature z-score or Isolation Forest threshold can exploit. DDoS-HTTP\_Flood and DDoS-SlowLoris, by contrast, have Rate values statistically indistinguishable from benign traffic --- both are low-and-slow, application-layer attacks.\relax }{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Baseline detector recall ($n{=}40$/class) vs.\ Claude naive-condition classification accuracy ($n{=}5$/class), by attack category. Both baselines are strong on volumetric Flood/Mirai traffic and collapse on Recon, Spoofing/MITM, Brute Force, and Web/App-layer attacks; the LLM remains near-ceiling across every category.\relax }}{12}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:baseline_vs_llm}{{5}{12}{Baseline detector recall ($n{=}40$/class) vs.\ Claude naive-condition classification accuracy ($n{=}5$/class), by attack category. Both baselines are strong on volumetric Flood/Mirai traffic and collapse on Recon, Spoofing/MITM, Brute Force, and Web/App-layer attacks; the LLM remains near-ceiling across every category.\relax }{figure.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Cross-model comparison. (a) Classification accuracy by condition. (b) Citation correctness among attack samples: both models improve substantially under RAG relative to their own ungrounded conditions, but GPT-4o's ungrounded correctness is roughly a third of Claude's while its RAG-grounded correctness exceeds Claude's.\relax }}{13}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:cross_model}{{6}{13}{Cross-model comparison. (a) Classification accuracy by condition. (b) Citation correctness among attack samples: both models improve substantially under RAG relative to their own ungrounded conditions, but GPT-4o's ungrounded correctness is roughly a third of Claude's while its RAG-grounded correctness exceeds Claude's.\relax }{figure.caption.14}{}}
+\gdef \LT@i {\LT@entry 
+    {1}{92.94424pt}\LT@entry 
+    {1}{406.59357pt}}
+\gdef \LT@ii {\LT@entry 
+    {1}{92.94424pt}\LT@entry 
+    {1}{406.59357pt}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Real, specific, correct-match entries}{14}{subsection.B.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces 22 real, specific, correct-match reference entries across both models' citation audits.\relax }}{14}{table.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Real but generic (parent-pattern) entries}{14}{subsection.B.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.3}Real but wrong-family entries}{14}{subsection.B.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces 41 real, verified, wrong-family reference entries across both models' citation audits -- the paper's key negative finding (Section\nobreakspace  {}\ref  {sec:citation-quality}, finding 2; Section\nobreakspace  {}\ref  {sec:cross-model}, finding 2).\relax }}{15}{table.9}\protected@file@percent }
+\bibcite{antonakakis2017understanding}{Antonakakis et al., 2017}
+\bibcite{kolias2017ddos}{Kolias et al., 2017}
+\bibcite{chandola2009anomaly}{Chandola et al., 2009}
+\bibcite{neto2023ciciot2023}{Neto et al., 2023}
+\bibcite{netflowviz}{Majed et al., 2025}
+\bibcite{hallucve}{Dao Duy, 2026}
+\bibcite{proverag}{Fayyazi et al., 2025}
+\bibcite{liu2008isolationforest}{Liu et al., 2008}
+\bibcite{capec}{MITRE CAPEC}
+\bibcite{nvd}{NVD}
+\bibcite{gpt4o}{OpenAI, 2024}
+\gdef \@abspage@last{16}

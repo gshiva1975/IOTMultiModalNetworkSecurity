@@ -1,0 +1,578 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./main_camlis_draftcheck.tex
+LaTeX2e <2021-11-15> patch level 1
+L3 programming layer <2022-01-21>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2021/10/04 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/times.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+(/usr/share/texlive/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref-langpatches.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+No file main_camlis_draftcheck.aux.
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty))
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/caption/ltcaption.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd)
+
+LaTeX Warning: Reference `sec:discussion' on page 1 undefined on input line 30.
+
+
+
+LaTeX Warning: Citation `antonakakis2017understanding' on page 1 undefined on i
+nput line 35.
+
+
+LaTeX Warning: Citation `kolias2017ddos' on page 1 undefined on input line 35.
+
+
+LaTeX Warning: Citation `chandola2009anomaly' on page 1 undefined on input line
+ 35.
+
+
+LaTeX Warning: Reference `sec:baselines' on page 1 undefined on input line 35.
+
+
+LaTeX Warning: Citation `netflowviz' on page 1 undefined on input line 37.
+
+
+LaTeX Warning: Citation `hallucve' on page 1 undefined on input line 37.
+
+
+LaTeX Warning: Citation `proverag' on page 1 undefined on input line 37.
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+
+LaTeX Warning: Reference `sec:cross-model' on page 2 undefined on input line 46
+.
+
+
+LaTeX Warning: Citation `netflowviz' on page 2 undefined on input line 51.
+
+
+LaTeX Warning: Citation `hallucve' on page 2 undefined on input line 53.
+
+
+LaTeX Warning: Reference `sec:scoring' on page 2 undefined on input line 53.
+
+
+LaTeX Warning: Reference `sec:discussion' on page 2 undefined on input line 53.
+
+
+
+Underfull \hbox (badness 1360) in paragraph at lines 53--54
+\T1/ptm/m/n/10 Duy [[]] in-tro-duced Hal-luCVE, a bench-mark for hal-lu-
+
+LaTeX Warning: Citation `proverag' on page 2 undefined on input line 55.
+
+
+Underfull \hbox (badness 1515) in paragraph at lines 55--56
+\T1/ptm/m/n/10 augmented sys-tem for vul-ner-a-bil-ity anal-y-sis that cross-
+
+LaTeX Warning: Citation `neto2023ciciot2023' on page 2 undefined on input line 
+57.
+
+
+LaTeX Warning: Citation `antonakakis2017understanding' on page 2 undefined on i
+nput line 59.
+
+
+LaTeX Warning: Citation `kolias2017ddos' on page 2 undefined on input line 59.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd)
+
+LaTeX Warning: Reference `sec:discussion' on page 2 undefined on input line 65.
+
+
+
+LaTeX Warning: File `figures/fig4_ddos_sample_visualizations.pdf' not found on 
+input line 73.
+
+
+LaTeX Warning: Reference `sec:baselines' on page 2 undefined on input line 74.
+
+
+LaTeX Warning: Reference `sec:baselines' on page 2 undefined on input line 74.
+
+[2] (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd)
+
+LaTeX Warning: Reference `sec:corpus' on page 3 undefined on input line 85.
+
+
+Underfull \vbox (badness 2680) has occurred while \output is active
+Underfull \hbox (badness 10000) in paragraph at lines 93--94
+\T1/ptm/m/n/10 Our RAG/text-grounding ref-er-ence cor-pus
+
+Underfull \hbox (badness 2894) in paragraph at lines 93--94
+\T1/ptm/m/n/10 (\T1/pcr/m/n/10 cve_corpus.json\T1/ptm/m/n/10 ) con-tains ref-er
+-ence en-tries in-de-
+
+Underfull \hbox (badness 1371) in paragraph at lines 93--94
+\T1/ptm/m/n/10 Flood), CAPEC-487 (ICMP Flood), CAPEC-495 (UDP
+
+Underfull \hbox (badness 1596) in paragraph at lines 93--94
+\T1/ptm/m/n/10 fall-back where no more spe-cific CAPEC en-try ex-ists),
+[3]
+
+LaTeX Warning: Reference `app:corpus' on page 4 undefined on input line 103.
+
+
+Overfull \hbox (47.13521pt too wide) detected at line 113
+[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 r; c\OT1/cmr/m/n/10 ) = []
+
+LaTeX Warning: Reference `sec:corpus' on page 4 undefined on input line 114.
+
+
+LaTeX Warning: Reference `sec:citation-quality' on page 4 undefined on input li
+ne 114.
+
+
+LaTeX Warning: Citation `liu2008isolationforest' on page 4 undefined on input l
+ine 123.
+
+
+LaTeX Warning: File `figures/fig1_accuracy_by_category.pdf' not found on input 
+line 171.
+
+
+LaTeX Warning: Reference `fig:baseline_vs_llm' on page 4 undefined on input lin
+e 172.
+
+
+LaTeX Warning: Reference `fig:baseline_vs_llm' on page 4 undefined on input lin
+e 172.
+
+
+LaTeX Warning: File `figures/fig2_citation_quality.pdf' not found on input line
+ 215.
+
+
+Underfull \hbox (badness 1112) in paragraph at lines 224--225
+[]\T1/ptm/b/n/10 2. Where the model does fail, it fails by mis-at-
+
+Underfull \hbox (badness 1028) in paragraph at lines 224--225
+\T1/ptm/b/n/10 --- not by in-vent-ing IDs. \T1/ptm/m/n/10 The clear-est ex-am-p
+le: for
+[4]
+
+LaTeX Warning: File `figures/fig5_ddos_rate_comparison.pdf' not found on input 
+line 270.
+
+
+LaTeX Warning: File `figures/fig3_baseline_vs_llm.pdf' not found on input line 
+279.
+
+
+LaTeX Warning: Citation `gpt4o' on page 5 undefined on input line 289.
+
+
+LaTeX Warning: File `figures/fig6_cross_model_comparison.pdf' not found on inpu
+t line 308.
+
+[5]
+Underfull \hbox (badness 2932) in paragraph at lines 319--320
+\T1/ptm/m/n/10 sam-ples, one \T1/pcr/m/n/10 CommandInjection \T1/ptm/m/n/10 sam
+-ple, and one
+
+LaTeX Warning: Reference `sec:baselines' on page 6 undefined on input line 324.
+
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active
+
+LaTeX Warning: Citation `hallucve' on page 6 undefined on input line 326.
+
+[6]
+Underfull \hbox (badness 4366) in paragraph at lines 330--331
+[]\T1/ptm/b/n/10 Two mod-els com-pared: the zero-fabrication re-
+
+Underfull \hbox (badness 1540) in paragraph at lines 336--337
+[]\T1/ptm/m/n/10 Our ref-er-ence cor-pus cov-ers 15 of 34 classes for
+
+LaTeX Warning: Reference `sec:cross-model' on page 7 undefined on input line 34
+4.
+
+[7]
+Underfull \hbox (badness 1701) in paragraph at lines 348--349
+\T1/ptm/m/n/10 Zero-shot mul-ti-modal clas-si-fi-ca-tion of IoT-botnet traf-fic
+
+
+LaTeX Warning: Reference `app:corpus' on page 8 undefined on input line 352.
+
+
+Underfull \hbox (badness 6477) in paragraph at lines 352--353
+\T1/ptm/m/n/10 The ref-er-ence cor-pus, prompt-ing logic, vi-su-al-iza-tion
+
+Underfull \vbox (badness 10000) has occurred while \output is active [8]
+Underfull \hbox (badness 1655) in paragraph at lines 356--357
+\T1/ptm/m/n/10 This work uses a pub-lic, IRB-exempt re-search dataset
+
+Underfull \hbox (badness 1231) in paragraph at lines 356--357
+\T1/ptm/m/n/10 per were in-de-pen-dently checked against nvd.nist.gov or
+
+Underfull \vbox (badness 10000) has occurred while \output is active [9]
+Underfull \hbox (badness 10000) in paragraph at lines 377--378
+[]\T1/ptm/b/n/10 RAG-grounded: \T1/ptm/m/n/10 ``[base con-text] Ref-er-ence
+
+Underfull \hbox (badness 1325) in paragraph at lines 377--378
+\T1/ptm/m/n/10 database of known at-tack pat-terns: [full text of ev-ery
+
+LaTeX Warning: Reference `sec:corpus' on page 10 undefined on input line 382.
+
+
+LaTeX Warning: Reference `sec:scoring' on page 10 undefined on input line 382.
+
+
+Underfull \hbox (badness 3417) in paragraph at lines 382--383
+\T1/ptm/m/n/10 The full cor-pus un-der-ly-ing Sec-tion [] and the ci-ta-
+
+Underfull \hbox (badness 3039) in paragraph at lines 382--383
+\T1/ptm/m/n/10 tion grad-ing in Sec-tion [], re-pro-duced di-rectly from
+
+Underfull \hbox (badness 1215) in paragraph at lines 382--383
+\T1/pcr/m/n/10 corpus.py\T1/ptm/m/n/10 . Ev-ery en-try was in-de-pen-dently che
+cked
+[10] [11] [12] [13]
+Underfull \hbox (badness 10000) in paragraph at lines 399--400
+\T1/ptm/m/n/10 DDoS-RSTFINFLOOD, DDoS-SlowLoris, DDoS-SynonymousIP_Flood, DDoS-
+
+
+LaTeX Warning: Reference `sec:cross-model' on page 14 undefined on input line 4
+64.
+
+
+LaTeX Warning: Reference `sec:citation-quality' on page 14 undefined on input l
+ine 477.
+
+
+LaTeX Warning: Reference `sec:cross-model' on page 14 undefined on input line 4
+77.
+
+
+LaTeX Warning: Reference `sec:citation-quality' on page 14 undefined on input l
+ine 477.
+
+
+LaTeX Warning: Reference `sec:cross-model' on page 14 undefined on input line 4
+77.
+
+[14] [15]
+Underfull \hbox (badness 2237) in paragraph at lines 512--513
+[]\T1/ptm/m/n/10 NVD. CVE-2016-10401; CVE-2017-17215. Re-
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--516
+\T1/ptm/m/n/10 A. P., et al.) (2024). GPT-4o sys-tem card.
+[16] (./main_camlis_draftcheck.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `main_camlis_draftcheck.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+ )
+(see the transcript file for additional information){/usr/share/texlive/texmf-d
+ist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr1
+0.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
+/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main_camlis_draftcheck.pdf (16 pages, 197295 bytes).
+Transcript written on main_camlis_draftcheck.log.
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./main_camlis_draftcheck.tex
+LaTeX2e <2021-11-15> patch level 1
+L3 programming layer <2022-01-21>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2021/10/04 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/times.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+(/usr/share/texlive/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref-langpatches.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./main_camlis_draftcheck.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty))
+(./main_camlis_draftcheck.out) (./main_camlis_draftcheck.out)
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/caption/ltcaption.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd) [1{/var/lib/texmf/fo
+nts/map/pdftex/updmap/pdftex.map}]
+Underfull \hbox (badness 1472) in paragraph at lines 51--52
+\T1/ptm/b/n/10 Zero-shot mul-ti-modal in-tru-sion de-tec-tion. \T1/ptm/m/n/10 M
+a-jed et
+
+Underfull \hbox (badness 2318) in paragraph at lines 51--52
+\T1/ptm/m/n/10 in a zero-shot set-ting on generic traf-fic with in-jected
+
+Underfull \hbox (badness 1968) in paragraph at lines 53--54
+\T1/ptm/m/n/10 for hal-lu-ci-na-tion in LLM-generated CTI us-ing a four-
+
+Underfull \hbox (badness 6141) in paragraph at lines 55--56
+\T1/ptm/b/n/10 y-sis. \T1/ptm/m/n/10 Fayyazi et al. [[]] pro-posed
+
+Underfull \hbox (badness 10000) in paragraph at lines 59--60
+[]\T1/ptm/b/n/10 The Mi-rai bot-net. \T1/ptm/m/n/10 An-ton-akakis et
+
+Underfull \hbox (badness 10000) in paragraph at lines 59--60
+\T1/ptm/m/n/10 al. [[]] pro-vide a ret-ro-spec-tive
+
+Underfull \hbox (badness 1910) in paragraph at lines 59--60
+\T1/ptm/m/n/10 anal-y-sis of Mi-rai's growth and DDoS ac-tiv-ity; Ko-lias
+
+Underfull \hbox (badness 1881) in paragraph at lines 59--60
+\T1/ptm/m/n/10 et al. [[]] an-a-lyze the broader class of
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd) [2]
+
+LaTeX Warning: File `figures/fig4_ddos_sample_visualizations.pdf' not found on 
+input line 73.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd)
+Underfull \hbox (badness 10000) in paragraph at lines 93--94
+\T1/ptm/m/n/10 Our RAG/text-grounding ref-er-ence cor-pus
+
+Underfull \hbox (badness 2894) in paragraph at lines 93--94
+\T1/ptm/m/n/10 (\T1/pcr/m/n/10 cve_corpus.json\T1/ptm/m/n/10 ) con-tains ref-er
+-ence en-tries in-de-
+
+Underfull \hbox (badness 1371) in paragraph at lines 93--94
+\T1/ptm/m/n/10 Flood), CAPEC-487 (ICMP Flood), CAPEC-495 (UDP
+
+Underfull \hbox (badness 1596) in paragraph at lines 93--94
+\T1/ptm/m/n/10 fall-back where no more spe-cific CAPEC en-try ex-ists),
+
+Overfull \hbox (47.13521pt too wide) detected at line 113
+[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 r; c\OT1/cmr/m/n/10 ) = []
+[3]
+
+LaTeX Warning: File `figures/fig1_accuracy_by_category.pdf' not found on input 
+line 171.
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active
+
+LaTeX Warning: File `figures/fig2_citation_quality.pdf' not found on input line
+ 215.
+
+
+Underfull \vbox (badness 1102) has occurred while \output is active [4]
+Underfull \hbox (badness 1112) in paragraph at lines 224--225
+[]\T1/ptm/b/n/10 2. Where the model does fail, it fails by mis-at-
+
+Underfull \hbox (badness 1028) in paragraph at lines 224--225
+\T1/ptm/b/n/10 --- not by in-vent-ing IDs. \T1/ptm/m/n/10 The clear-est ex-am-p
+le: for
+
+Underfull \vbox (badness 10000) has occurred while \output is active
+
+LaTeX Warning: File `figures/fig5_ddos_rate_comparison.pdf' not found on input 
+line 270.
+
+
+LaTeX Warning: File `figures/fig3_baseline_vs_llm.pdf' not found on input line 
+279.
+
+
+LaTeX Warning: File `figures/fig6_cross_model_comparison.pdf' not found on inpu
+t line 308.
+
+[5]
+Underfull \hbox (badness 2932) in paragraph at lines 319--320
+\T1/ptm/m/n/10 sam-ples, one \T1/pcr/m/n/10 CommandInjection \T1/ptm/m/n/10 sam
+-ple, and one
+[6]
+Underfull \hbox (badness 4366) in paragraph at lines 330--331
+[]\T1/ptm/b/n/10 Two mod-els com-pared: the zero-fabrication re-
+
+Underfull \hbox (badness 1540) in paragraph at lines 336--337
+[]\T1/ptm/m/n/10 Our ref-er-ence cor-pus cov-ers 15 of 34 classes for
+[7]
+Underfull \hbox (badness 1701) in paragraph at lines 348--349
+\T1/ptm/m/n/10 Zero-shot mul-ti-modal clas-si-fi-ca-tion of IoT-botnet traf-fic
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active [8]
+Underfull \hbox (badness 6477) in paragraph at lines 352--353
+\T1/ptm/m/n/10 The ref-er-ence cor-pus, prompt-ing logic, vi-su-al-iza-tion
+
+Underfull \hbox (badness 1655) in paragraph at lines 356--357
+\T1/ptm/m/n/10 This work uses a pub-lic, IRB-exempt re-search dataset
+
+Underfull \hbox (badness 1231) in paragraph at lines 356--357
+\T1/ptm/m/n/10 per were in-de-pen-dently checked against nvd.nist.gov or
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 377--378
+[]\T1/ptm/b/n/10 RAG-grounded: \T1/ptm/m/n/10 ``[base con-text] Ref-er-ence
+
+Underfull \hbox (badness 1325) in paragraph at lines 377--378
+\T1/ptm/m/n/10 database of known at-tack pat-terns: [full text of ev-ery
+
+Underfull \hbox (badness 2799) in paragraph at lines 382--383
+\T1/ptm/m/n/10 The full cor-pus un-der-ly-ing Sec-tion [][]3.4[][] and the ci-t
+a-
+
+Underfull \hbox (badness 2418) in paragraph at lines 382--383
+\T1/ptm/m/n/10 tion grad-ing in Sec-tion [][]3.5[][], re-pro-duced di-rectly fr
+om
+
+Underfull \hbox (badness 1215) in paragraph at lines 382--383
+\T1/pcr/m/n/10 corpus.py\T1/ptm/m/n/10 . Ev-ery en-try was in-de-pen-dently che
+cked
+[10] [11] [12] [13]
+Underfull \hbox (badness 10000) in paragraph at lines 399--400
+\T1/ptm/m/n/10 DDoS-RSTFINFLOOD, DDoS-SlowLoris, DDoS-SynonymousIP_Flood, DDoS-
+
+[14] [15]
+Underfull \hbox (badness 2237) in paragraph at lines 512--513
+[]\T1/ptm/m/n/10 NVD. CVE-2016-10401; CVE-2017-17215. Re-
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--516
+\T1/ptm/m/n/10 A. P., et al.) (2024). GPT-4o sys-tem card.
+[16] (./main_camlis_draftcheck.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ )
+(see the transcript file for additional information){/usr/share/texlive/texmf-d
+ist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr1
+0.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
+/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main_camlis_draftcheck.pdf (16 pages, 200097 bytes).
+Transcript written on main_camlis_draftcheck.log.

@@ -1,0 +1,736 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{longtable}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\newcommand{\pending}[1]{\textcolor{red!70!black}{\textbf{[PENDING: #1]}}}
+
+\title{Citation-Grounded Classification from Raw Network Flow Features:\\
+Claude Sonnet versus GPT-4o-mini on the Real CIC-IoT-2023 Dataset}
+\author{Gangadhar Singh Shiva \and Poonam Singh Umakanth}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Citation-grounded classification pipelines reduce hallucination by requiring
+a model to justify a security finding with a reference to an authoritative
+external identifier (a CAPEC attack pattern or CVE record) rather than an
+unsupported assertion. Prior work in this line measured citation accuracy
+when the model is given a natural-language description of an observed
+finding, either hand-written or derived from an image. This paper removes
+that natural-language intermediary entirely: each trial presents a model
+with the raw, 39-feature numeric flow vector extracted directly from a real
+network capture, with no interpretive paraphrase, and asks it to classify
+and cite. We sample 1,360 flows (40 per class, fixed seed) from the real
+CIC-IoT-2023 dataset (34 classes, 46{,}776{,}697 rows, 8.4~GB, obtained and
+verified locally) and compare Claude Sonnet and GPT-4o-mini under two
+context-construction strategies (full-corpus and TF-IDF top-5 retrieval)
+against the same 15-entry, individually verified CAPEC/CVE corpus used
+throughout this project's prior work. Nineteen of the 34 real classes have
+a directly matching real corpus entry (ground-truth trials); the remaining
+15, including benign traffic, do not and are legitimate
+abstention-expected trials. Of 5,440 planned real API calls, 387 (all
+Claude, 14.2\% of Claude's total) failed with a disclosed, non-modeling
+cause -- an Anthropic account usage-limit error -- and are excluded from
+every metric in this report rather than counted as errors; critically,
+these failures are \emph{not} randomly distributed across classes (
+Section~\ref{sec:limitations}) and this is reported rather than smoothed
+over. On the 5,053 successfully scored real trials: correct-citation rate
+was 52.1\%~[48.1,56.0] (Claude, full-corpus) and 50.2\%~[46.2,54.1] (Claude,
+RAG) versus 36.7\%~[33.3,40.3] (GPT-4o-mini, full-corpus) and
+36.8\%~[33.4,40.3] (GPT-4o-mini, RAG) -- a large, statistically significant
+gap favoring Claude at fixed strategy (McNemar $p<0.0001$ full-corpus,
+$p=0.0007$ RAG). Zero invented IDs occurred across all 5,053 trials. Correct
+abstention on the 15 no-match classes was rare for both models
+(0.3\%--2.1\%), a substantially worse abstention profile than this
+project's earlier natural-language-query experiments on the same corpus.
+Per-class results show a sharp split: flood-type volumetric attacks
+(TCP/UDP/ICMP/SYN floods) were classified with 87.5--100\% accuracy by both
+models, while protocol-semantic and application-layer attacks (SQL
+injection, XSS, brute-force, Mirai infection, spoofing) scored at or near
+0\% -- evidence that a 39-feature flow summary alone carries strong signal
+for volumetric attacks but effectively none for attacks whose signature is
+in payload content or multi-flow behavioral context. We report this as a
+disclosed partial dataset, not a completed one: 387 Claude trials remain
+pending an account usage-limit reset and are explicitly out of scope for
+this report's numbers.
+\end{abstract}
+
+\section{Introduction}
+
+Citation-grounded architectures for automated threat classification reduce
+one specific failure mode -- a model asserting a finding with no traceable
+external evidence -- by requiring every classification to reference a real,
+verifiable identifier drawn from a fixed corpus, or to explicitly decline
+when no entry applies. This project's prior work measured that architecture
+under two conditions: a purely synthetic, hand-paraphrased query set
+(\citet{clearsight2026}, the full-corpus-vs-RAG retrieval study), and a
+natural-language "observed finding" description manually or programmatically
+derived from an underlying artifact (the Claude-vs-GPT-4o-mini
+citation-accuracy study). In both cases, a human- or pipeline-authored
+English sentence stood between the raw evidence and the model.
+
+That intermediary is a confound. A natural-language description of a
+network flow already encodes an interpretation -- "sustained high-rate SYN
+packets with no completed handshake" is itself a classification, expressed
+in different words. A model shown that sentence is not being asked to
+classify raw evidence; it is being asked to recognize a paraphrase of the
+answer. This paper removes the paraphrase. Each trial in this experiment
+shows the model the literal 39-feature numeric vector extracted from one
+real network flow in the CIC-IoT-2023 dataset~\citep{neto2023ciciot2023} --
+header length, protocol type, TTL, per-flag packet counts, protocol
+indicator flags, and packet-size/inter-arrival-time statistics -- with no
+interpretive text of any kind, and asks the model to classify the flow and
+cite the matching entry in a fixed, real CAPEC/CVE grounding corpus, or to
+abstain if none applies.
+
+This is a harder and more realistic task than the natural-language version:
+it is what a citation-grounded pipeline would actually face if it ingested
+NetFlow-style records directly, without a hand-authored intermediate
+summary (cf.\ multimodal approaches that instead visualize flow features as
+images before classification, e.g.\ \citet{netflowviz}). It also lets this
+paper measure something the earlier natural-language experiments could
+not: whether citation accuracy on this project's corpus is uniform across
+attack types, or concentrated in the attack types whose statistical
+signature survives being reduced to 39 numbers.
+
+Contributions:
+\begin{enumerate}
+    \item A real-data sampling protocol (Section~\ref{sec:dataset}) drawn
+    directly from the full, locally verified CIC-IoT-2023 CSV release (34
+    classes, 46.7 million rows, 8.4~GB) -- not a synthetic or
+    previously-subsampled derivative.
+    \item A disclosed, programmatically derived ground-truth mapping
+    (Section~\ref{sec:corpus}) from 19 of the 34 real classes to this
+    project's existing 15-entry verified CAPEC/CVE corpus, and an explicit
+    accounting of the 15 classes with no real matching entry.
+    \item A raw-feature task design (Section~\ref{sec:task}) that shows the
+    model literal extracted features rather than a natural-language
+    paraphrase, isolating citation accuracy from paraphrase-recognition.
+    \item Real results (Section~\ref{sec:results}) from 5,053 successfully
+    scored live API trials across two models and two context-construction
+    strategies, including a per-class breakdown that surfaces a large,
+    previously unmeasured accuracy split between volumetric and
+    protocol-semantic attack types.
+    \item A precise, non-aggregated account of a real data-collection
+    failure (Section~\ref{sec:limitations}): 387 Claude trials are missing
+    because of an account usage limit, and -- unlike a simple "14.2\% of
+    trials failed" disclosure -- we show these failures are concentrated in
+    the last five classes processed, so four real classes currently have
+    \emph{zero} Claude data, a materially different situation from a
+    uniform random 14.2\% loss.
+\end{enumerate}
+
+\section{Related Work}
+
+\citet{clearsight2026} introduced the citation-grounded architecture this
+paper's task design builds on. The companion full-corpus-vs-RAG retrieval
+study measured retrieval recall, cost, and latency across TF-IDF,
+BM25~\citep{robertson2009bm25}, and LSA~\citep{deerwester1990lsa} backends
+against a synthetic query set, without exercising a live classifying model.
+A follow-up study exercised live Claude and GPT-4o-mini API calls on a
+45-query, hand-paraphrased natural-language version of the same task,
+finding zero invented IDs across 180 scored trials and a
+context-strategy-sensitivity asymmetry between the two models. This paper
+is the natural-data extension of that line: the same corpus and the same
+two models, but the query is now a real, unmodified flow-feature vector
+rather than an authored sentence.
+
+Multimodal approaches to the same underlying problem visualize NetFlow
+features as images and classify the image directly
+\citep{netflowviz}, trading the raw-feature representation used here for a
+visual one; this project's separate CAMLIS-track paper compares that visual
+ingestion pathway against text-native ingestion for the same dataset. The
+CIC-IoT-2023 dataset itself~\citep{neto2023ciciot2023} provides labeled
+traffic from 33 attack types across 7 categories plus benign traffic,
+captured from a 105-device IoT topology; this paper uses all 34 provided
+labels. Anomaly detection surveys~\citep{chandola2009anomaly} and classical
+statistical/ML detectors form the pre-LLM baseline this citation-grounded
+line of work is positioned against: those detectors flag a deviation but do
+not produce a human-auditable, externally verifiable citation for it, which
+is the specific gap this architecture targets.
+
+\section{Dataset}
+\label{sec:dataset}
+
+\subsection{Source}
+
+All results in this paper use the CIC-IoT-2023
+dataset~\citep{neto2023ciciot2023}, CSV release, obtained and verified
+directly (not a third-party mirror or resample). The local copy contains
+309 CSV files across 34 class subdirectories, totaling 8.4~GB and
+46{,}776{,}697 data rows (row counts confirmed by direct line-count over
+every file, not read from documentation). Each row is one extracted network
+flow with 39 numeric features: \texttt{Header\_Length}, \texttt{Protocol
+Type}, \texttt{Time\_To\_Live}, \texttt{Rate}, seven per-flag indicator/
+count columns (SYN/FIN/RST/PSH/ACK/ECE/CWR and their counts), eleven
+protocol-presence indicator columns (HTTP, HTTPS, DNS, Telnet, SMTP, SSH,
+IRC, TCP, UDP, DHCP, ARP, ICMP, IGMP, IPv, LLC), and eight packet-size/
+timing statistics (total sum, min, max, average, standard deviation, total
+size, inter-arrival time, packet count, variance).
+
+Table~\ref{tab:classcounts} shows the real per-class row-count range: from
+1{,}252 rows (\texttt{Uploading\_Attack}, the smallest class) to
+7{,}200{,}501 rows (\texttt{DDoS-ICMP\_Flood}, the largest) -- a
+5{,}750$\times$ imbalance across classes. Because even the smallest class
+has over a thousand rows, this paper's sampling design (below) is not
+data-constrained the way an earlier, image-based experiment on the same
+project's visualization dataset was (that dataset had only 4--5 images per
+class).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+\textbf{Statistic} & \textbf{Value} \\
+\midrule
+Classes & 34 (33 attack + Benign) \\
+CSV files & 309 \\
+Total size & 8.4~GB \\
+Total data rows & 46{,}776{,}697 \\
+Smallest class (rows) & 1{,}252 (Uploading\_Attack) \\
+Largest class (rows) & 7{,}200{,}501 (DDoS-ICMP\_Flood) \\
+Features per row & 39 \\
+\bottomrule
+\end{tabular}
+\caption{Real, directly measured statistics of the local CIC-IoT-2023 CSV
+dataset used in this paper.}
+\label{tab:classcounts}
+\end{table}
+
+\subsection{Sampling}
+
+We draw a stratified sample of $N{=}40$ rows per class (1{,}360 rows total),
+fixed seed 42, using memory-safe reservoir-style index sampling: for each
+class, global row indices are drawn uniformly without replacement across
+that class's constituent files (weighted correctly by each file's row
+count), then each source file is scanned once to extract only the sampled
+rows -- no file is ever fully loaded into memory. $N{=}40$/class was chosen
+over a larger $N$ (e.g.\ 100/class) as a cost/precision balance: at
+$N{=}40$, a Wilson confidence interval on an $\approx$85\% accuracy
+estimate is roughly $\pm$11 points, versus $\pm$16 points at $N{=}20$, for
+an incremental real-API cost of approximately \$10 -- judged worthwhile;
+$N{=}100$ would tighten this further but at roughly 2.5$\times$ the cost for
+diminishing precision gain. The resulting manifest (sample id, true class,
+ground-truth citation id, source file, row index, and the exact serialized
+query text -- see Section~\ref{sec:task}) is a frozen, versioned artifact:
+the experiment-runner script never re-touches the source CSVs, so the exact
+sampled rows are reproducible and auditable independent of the multi-GB
+source files.
+
+\section{Grounding Corpus and Ground-Truth Mapping}
+\label{sec:corpus}
+
+This paper reuses, unchanged, the 15-entry real CAPEC/CVE grounding corpus
+established and individually verified (each ID fetched from its official
+source, \url{capec.mitre.org} or \url{nvd.nist.gov}) in this project's
+prior retrieval and citation-accuracy studies: 12 CAPEC attack patterns and
+3 CVE records (Table~\ref{tab:corpus}).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{ID} & \textbf{Name} & \textbf{Kind} \\
+\midrule
+CAPEC-482 & TCP Flood & CAPEC \\
+CAPEC-488 & HTTP Flood & CAPEC \\
+CAPEC-486 & UDP Flood & CAPEC \\
+CAPEC-487 & ICMP Flood & CAPEC \\
+CAPEC-300 & Port Scanning & CAPEC \\
+CAPEC-49 & Password Brute Forcing & CAPEC \\
+CAPEC-94 & Adversary in the Middle (AiTM) & CAPEC \\
+CAPEC-141 & Cache Poisoning & CAPEC \\
+CAPEC-66 & SQL Injection & CAPEC \\
+CAPEC-63 & Cross-Site Scripting (XSS) & CAPEC \\
+CAPEC-137 & Parameter Injection & CAPEC \\
+CAPEC-153 & Input Data Manipulation & CAPEC \\
+CVE-2016-10401 & ZyXEL PK5001Z default \texttt{su} password & CVE \\
+CVE-2017-17215 & Huawei HG532 remote code execution & CVE \\
+CVE-2014-9583 & ASUS WRT \texttt{infosvr} backdoor & CVE \\
+\bottomrule
+\end{tabular}
+\caption{Grounding corpus, unchanged from prior work in this project.}
+\label{tab:corpus}
+\end{table}
+
+Each corpus entry carries a list of the real CIC-IoT-2023 class names it
+covers (its \texttt{attack\_families} field, established when this corpus
+was first built). We use that existing, disclosed field -- not a mapping
+hand-picked for this paper -- to programmatically determine, for each of
+the 34 real classes, whether a real ground-truth citation id exists.
+Table~\ref{tab:mapping} shows the result: 19 of 34 classes map to a real
+entry; the remaining 15, including \texttt{Benign\_Final}, have no matching
+entry and are legitimate abstention-expected trials, exactly analogous to
+the held-out abstention queries in this project's earlier natural-language
+experiment. This is not a gap papered over with synthetic entries: it is
+the honest coverage of a small, hand-verified real corpus, and the 15
+unmapped classes are scored on whether the model correctly recognizes that
+nothing in the corpus applies, not silently dropped from the experiment.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{19 classes with a real ground-truth id} & \textbf{Mapped entry} \\
+\midrule
+DDoS-HTTP\_Flood, DoS-HTTP\_Flood & CAPEC-488 \\
+DDoS-ICMP\_Flood & CAPEC-487 \\
+DDoS-SYN\_Flood, DDoS-TCP\_Flood, DoS-SYN\_Flood, DoS-TCP\_Flood & CAPEC-482 \\
+DDoS-UDP\_Flood, DoS-UDP\_Flood & CAPEC-486 \\
+DNS\_Spoofing & CAPEC-141 \\
+DictionaryBruteForce & CAPEC-49 \\
+MITM-ArpSpoofing & CAPEC-94 \\
+Mirai-greeth\_flood, Mirai-greip\_flood & CVE-2017-17215 \\
+Mirai-udpplain & CVE-2014-9583 \\
+Recon-PortScan & CAPEC-300 \\
+SqlInjection & CAPEC-66 \\
+Uploading\_Attack & CAPEC-137 \\
+XSS & CAPEC-63 \\
+\midrule
+\textbf{15 classes with no real match (abstention-expected)} & \\
+\midrule
+\multicolumn{2}{l}{Backdoor\_Malware, Benign\_Final, BrowserHijacking, CommandInjection,} \\
+\multicolumn{2}{l}{DDoS-ACK\_Fragmentation, DDoS-ICMP\_Fragmentation, DDoS-PSHACK\_FLOOD,} \\
+\multicolumn{2}{l}{DDoS-RSTFINFLOOD, DDoS-SlowLoris, DDoS-SynonymousIP\_Flood,} \\
+\multicolumn{2}{l}{DDoS-UDP\_Fragmentation, Recon-HostDiscovery, Recon-OSScan,} \\
+\multicolumn{2}{l}{Recon-PingSweep, VulnerabilityScan} \\
+\bottomrule
+\end{tabular}
+\caption{Programmatic ground-truth mapping from real CIC-IoT-2023 classes
+to the 15-entry corpus, derived from each entry's existing
+\texttt{attack\_families} field. \texttt{Mirai-udpplain} is also plausibly
+covered by CVE-2016-10401 (ZyXEL); the mapping resolves such ties
+deterministically to one canonical id, a disclosed simplification (multiple
+real CVEs are plausible root causes for the same observed traffic class).}
+\label{tab:mapping}
+\end{table}
+
+\section{Task Design}
+\label{sec:task}
+
+\subsection{Raw-feature query construction}
+
+Each trial's query is a single, literal serialization of one sampled row's
+39 feature values as \texttt{name=value} pairs (e.g.\ \texttt{Header\_
+Length=6.4, Protocol Type=17, Time\_To\_Live=60.2, Rate=35.06, ...}),
+prefixed with the fixed string ``Observed network flow, extracted feature
+vector:''. No natural-language interpretation, protocol name lookup (e.g.\
+mapping the numeric protocol id 17 to ``UDP''), or statistical summary is
+added. This is a deliberate departure from this project's earlier
+natural-language query design: it removes the possibility that the model is
+merely pattern-matching a paraphrase, at the cost of a harder, more
+realistic task, and it is the central methodological difference this paper
+studies relative to that earlier work.
+
+\subsection{Response format and grading}
+
+Unchanged from this project's established citation-grounded task
+definition: the model is shown a set of candidate reference entries (either
+all 15 corpus entries, or the top-5 TF-IDF-retrieved entries, depending on
+condition) and the single query, and must respond with (a) a short
+classification label, (b) a cited entry id drawn only from the entries
+shown or \texttt{null} if none applies, and (c) a one-sentence
+justification. Grading, also unchanged: \textbf{correct-citation} (cited id
+equals the true class's mapped ground-truth id, ground-truth trials only),
+\textbf{invented-id} (cited id was not among the entries actually shown),
+and \textbf{correctly-abstained} (cited id is null, abstention-expected
+trials only).
+
+\subsection{Models and context-construction strategies}
+
+Two models: \textbf{Claude} (Anthropic API, model string
+\texttt{claude-sonnet-5}) and \textbf{GPT-4o-mini} (OpenAI API, model
+string \texttt{gpt-4o-mini}). Two context-construction strategies, reusing
+the \texttt{FullCorpusStrategy} and \texttt{RAGStrategy} (TF-IDF, $k{=}5$)
+implementations from this project's prior retrieval study unchanged:
+\textbf{full-corpus} (all 15 entries shown every trial) and \textbf{RAG}
+(top-5 TF-IDF-retrieved entries only). As in prior work, Claude's API
+rejects an explicit \texttt{temperature} parameter for this model string
+(a disclosed deviation carried over from the earlier study); GPT-4o-mini
+runs at temperature~0. Planned trial count: 1{,}360 samples $\times$ 2
+models $\times$ 2 strategies $=$ 5{,}440 real API calls.
+
+\subsection{Resumable execution}
+
+Because a 5{,}440-call real-money run can be interrupted by rate limits,
+network faults, or (as happened in this run) an account usage cap, the
+harness checkpoints every trial result to disk immediately upon completion
+and, on any restart, skips every (sample, model, strategy) combination that
+already has a successful result, retrying only what previously failed or
+never ran. This is what makes it possible to report a disclosed partial
+result in Section~\ref{sec:results} rather than being forced to either wait
+indefinitely or discard already-collected, already-paid-for data.
+
+\section{Statistical Plan}
+\label{sec:stats}
+
+Point estimates use bootstrap 95\% confidence intervals (10{,}000
+resamples), consistent with this project's prior work. Because both models
+are run on the same sampled rows, the Claude-vs-GPT-4o-mini comparison at
+fixed strategy is paired, and a continuity-corrected McNemar's test is used
+on correct-citation outcomes; the same pairing and test are used for
+full-corpus-vs-RAG at fixed model.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Scope of this report}
+
+Of 5{,}440 planned real trials, 5{,}053 completed successfully; 387 (all
+Claude, 193 full-corpus and 194 RAG) failed with the same disclosed,
+non-modeling cause: \texttt{"You have reached your specified API usage
+limits. You will regain access on 2026-09-01."} Per this paper's explicit
+scope decision, these 387 trials are excluded from every metric below --
+not imputed, not counted as incorrect, not waited on. Section~\ref{sec:limitations}
+gives the precise, non-uniform distribution of these failures across
+classes, which materially affects how the Claude numbers below should be
+read.
+
+\subsection{Citation accuracy}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llrccc}
+\toprule
+\textbf{Model} & \textbf{Strategy} & \textbf{N} & \textbf{Correct-citation} & \textbf{Invented-ID} & \textbf{Correct-abstain} \\
+\midrule
+Claude & full-corpus & 607 & 0.521~[0.481,0.560] & 0.000~[0.000,0.000] & 0.021~[0.011,0.034] \\
+Claude & RAG ($k{=}5$) & 606 & 0.502~[0.462,0.541] & 0.000~[0.000,0.000] & 0.016~[0.007,0.027] \\
+GPT-4o-mini & full-corpus & 760 & 0.367~[0.333,0.403] & 0.000~[0.000,0.000] & 0.005~[0.000,0.012] \\
+GPT-4o-mini & RAG ($k{=}5$) & 760 & 0.368~[0.334,0.403] & 0.000~[0.000,0.000] & 0.003~[0.000,0.008] \\
+\bottomrule
+\end{tabular}
+\caption{Citation accuracy, real live API results, 5{,}053 successfully
+scored trials (387 excluded per Section~\ref{sec:limitations}). N is the
+ground-truth-trial count actually scored (out of a planned 760 per cell for
+the 19 mapped classes); correct-abstain N is separately computed over the
+abstention-expected trials (planned 600 per cell) and not shown as a
+column here for space, see \texttt{csv\_flow\_summary.csv}. Bootstrap 95\%
+CIs, 10{,}000 resamples.}
+\label{tab:results-main}
+\end{table}
+
+Zero invented IDs across all 5{,}053 scored trials, both models, both
+strategies -- consistent with every prior experiment in this project.
+Correct-citation rate is substantially lower than the earlier
+natural-language-query experiment on the same corpus (which measured
+82--96\%): Claude scores 50--52\%, GPT-4o-mini 37\%, on this raw-feature
+version of the task. Correct-abstention is rare for both models
+(0.3--2.1\%), markedly worse than the earlier natural-language experiment's
+abstention rates.
+
+\subsection{Paired comparisons}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Strategy} & \textbf{$n$ pairs} & \textbf{$b$, $c$} & \textbf{$\chi^2$ (p-value)} \\
+\midrule
+full-corpus & 607 & $b{=}44$, $c{=}7$ & $\chi^2{=}25.412$ ($p{<}0.0001$) \\
+RAG ($k{=}5$) & 606 & $b{=}35$, $c{=}11$ & $\chi^2{=}11.500$ ($p{=}0.0007$) \\
+\bottomrule
+\end{tabular}
+\caption{McNemar's test, Claude vs.\ GPT-4o-mini, correct-citation, paired
+by sample, at fixed strategy.}
+\label{tab:mcnemar-model}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{$n$ pairs} & \textbf{$b$, $c$} & \textbf{$\chi^2$ (p-value)} \\
+\midrule
+Claude & 606 & $b{=}18$, $c{=}6$ & $\chi^2{=}5.042$ ($p{=}0.0247$) \\
+GPT-4o-mini & 760 & $b{=}1$, $c{=}2$ & $\chi^2{=}0.000$ ($p{=}1.0000$) \\
+\bottomrule
+\end{tabular}
+\caption{McNemar's test, full-corpus vs.\ RAG, correct-citation, paired by
+sample, at fixed model.}
+\label{tab:mcnemar-strategy}
+\end{table}
+
+Claude's correct-citation rate is significantly higher than GPT-4o-mini's
+at both strategies ($p{<}0.0001$ full-corpus, $p{=}0.0007$ RAG) -- unlike
+the earlier natural-language experiment, where the two models were
+statistically indistinguishable. Within-model, full-corpus outperforms RAG
+significantly for Claude ($p{=}0.0247$) but not for GPT-4o-mini
+($p{=}1.0000$, $b$ and $c$ are both near zero, i.e.\ almost no samples flip
+outcome between strategies).
+
+\subsection{Per-class breakdown}
+
+Table~\ref{tab:byclass} groups the 19 ground-truth classes by observed
+accuracy pattern (full detail in \texttt{csv\_flow\_by\_class.csv}). The
+split is stark: every flood-type volumetric class (SYN/TCP/UDP/ICMP floods,
+both DoS and DDoS variants) scores 87.5--100\% for both models, while every
+protocol-semantic or application-layer class (SQL injection, XSS, brute
+force, port scanning, ARP/DNS spoofing, all three Mirai infection vectors)
+scores at or near 0\% for both models. \texttt{DDoS/DoS-HTTP\_Flood} is the
+one mapped class that falls in between (0--55\%, the most model- and
+strategy-sensitive class in the corpus).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llc}
+\toprule
+\textbf{Pattern} & \textbf{Classes} & \textbf{Accuracy range (both models)} \\
+\midrule
+Volumetric flood & DDoS/DoS-\{SYN,TCP,UDP,ICMP\}\_Flood & 0.875--1.000 \\
+HTTP flood (mixed) & DDoS/DoS-HTTP\_Flood & 0.000--0.550 \\
+Protocol-semantic / app-layer & SqlInjection, XSS, DictionaryBruteForce, & \\
+ & MITM-ArpSpoofing, DNS\_Spoofing, Recon-PortScan, & 0.000--0.025 \\
+ & Uploading\_Attack, Mirai-\{greeth,greip,udpplain\} & \\
+\bottomrule
+\end{tabular}
+\caption{Per-class correct-citation accuracy, grouped by observed pattern,
+pooled across both models and both strategies.}
+\label{tab:byclass}
+\end{table}
+
+\subsection{Cost}
+
+Total real spend across the 5{,}053 scored trials: \$22.13. Claude
+full-corpus (\$13.57) and RAG (\$7.85) together account for \$21.42
+(96.8\%) of total spend; GPT-4o-mini full-corpus (\$0.46) and RAG (\$0.25)
+together cost \$0.71. This matches the pre-registered cost estimate
+(Section~\ref{sec:dataset}) of approximately \$21 for a complete run,
+confirming the empirically-grounded per-call cost model carried over from
+this project's earlier natural-language experiment generalizes to the
+raw-feature task despite the different query content -- expected, since
+input tokens are corpus-dominated (the fixed 15-entry corpus text is far
+larger than either a short English sentence or a serialized 39-feature
+row).
+
+\section{Discussion}
+\label{sec:disc}
+
+The single largest finding is not the Claude-vs-GPT-4o-mini gap but the
+per-class split (Section~\ref{sec:results}): a 39-feature flow summary
+alone is apparently sufficient for near-perfect classification of
+volumetric flood attacks, and close to useless for protocol-semantic and
+application-layer attacks. This is a plausible, mechanistically sensible
+result rather than a surprising one: a SYN flood's signature (extreme SYN
+flag counts, extreme packet rate, near-zero completed handshakes) is
+directly visible in the summary statistics this dataset extracts; a SQL
+injection or XSS payload's signature is in the packet's application-layer
+content, which these 39 features do not capture at all. The near-zero
+accuracy on Mirai infection vectors (which in the real corpus are
+grounded in device-compromise CVEs about default credentials and RCE, not
+about the flood traffic Mirai devices later generate) makes the same point
+from another angle: the corpus entries describe the \emph{infection}
+mechanism, but the sampled flow features describe \emph{traffic}, a
+category mismatch no amount of prompting fixes.
+
+This reframes the Claude-vs-GPT-4o-mini comparison (Section~\ref{sec:results}):
+Claude's significant advantage (52\% vs.\ 37\%, both strategies) is real
+and consistent, but neither model is being tested primarily on "citation
+skill" in the abstract -- both are being tested on whether they can
+recognize volumetric-attack signatures in raw numeric data, since that is
+where almost all of the correct-citation mass in this corpus actually
+lives. A production pipeline built on this exact corpus and exact raw-
+feature representation should expect strong performance on flood-type
+detection and should not rely on either model for protocol-semantic attack
+classification from flow features alone -- that would require either a
+richer feature set (packet payload, not just header/timing statistics) or
+a different grounding corpus entirely.
+
+The near-total abstention failure (0.3--2.1\% correct-abstain, both
+models, both strategies) is the second major finding and is worse than
+this project has measured before. In the earlier natural-language
+experiment, abstention was measured on only 5 held-out queries per cell and
+was too noisy to interpret; here, with 600 abstention-expected trials per
+cell, the low rate is precise, not noisy. Both models, shown a raw feature
+vector from e.g.\ \texttt{Benign\_Final} (normal traffic) or
+\texttt{VulnerabilityScan} (a class outside the 15-entry corpus's
+coverage), overwhelmingly forced a citation onto the nearest available
+entry rather than declining. This is the specific failure mode
+citation-grounding is meant to prevent, and on this raw-feature task it is
+not being prevented in practice -- a materially more important limitation
+than the correct-citation numbers alone would suggest, since it means the
+pipeline's citations cannot currently be trusted as evidence that a real
+match exists, only that the model produced \emph{some} answer.
+
+\section{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}
+    \item \textbf{387 Claude trials are missing, non-randomly.} All 387
+    failures share one cause (account usage-limit reached,
+    \texttt{2026-09-01} reset) and are concentrated at the end of the
+    manifest's alphabetical class-processing order: \texttt{SqlInjection},
+    \texttt{Uploading\_Attack}, \texttt{VulnerabilityScan}, and
+    \texttt{XSS} have \emph{zero} successful Claude trials in this report
+    (both strategies), and \texttt{Recon-PortScan} has only 6--7 of 40. This
+    means the Claude correct-citation numbers in Table~\ref{tab:results-main}
+    are not an unbiased estimate across all 19 mapped classes -- they
+    entirely exclude two of the protocol-semantic classes already shown to
+    score near 0\% for GPT-4o-mini, which, if included, would very likely
+    lower Claude's aggregate correct-citation rate further, not raise it.
+    This is the single most important caveat on this report's headline
+    numbers and is why this paper is explicitly scoped as a partial-dataset
+    report rather than a completed one.
+    \item \textbf{Corpus covers 19 of 34 real classes.} The 15-entry corpus
+    is unchanged from prior work and was not expanded for this raw-feature
+    task; the 15 unmapped classes are scored only on abstention, not on
+    whether a more complete corpus would have let the model cite them
+    correctly.
+    \item \textbf{TF-IDF retrieval only.} The RAG condition reuses the
+    existing TF-IDF, $k{=}5$ retriever, not a neural embedding model; recall
+    at this retriever's ceiling was already characterized in prior work and
+    is not re-measured here.
+    \item \textbf{Single sample, single seed.} $N{=}40$/class was drawn
+    once with a fixed seed; no repeat-sampling variance estimate exists for
+    the per-class accuracy figures in Table~\ref{tab:byclass}.
+    \item \textbf{Feature set is header/timing statistics only.} The 39
+    features extracted by this dataset's pipeline contain no
+    application-layer payload content; the near-zero accuracy on
+    protocol-semantic classes (Section~\ref{sec:disc}) may be a ceiling
+    imposed by the feature extraction step, not by either model's
+    reasoning ability, and this experiment cannot distinguish those two
+    explanations.
+    \item \textbf{Claude did not run at temperature 0.} Carried over from
+    prior work: the Anthropic API rejects an explicit \texttt{temperature}
+    parameter for \texttt{claude-sonnet-5}; GPT-4o-mini ran at true
+    temperature 0. This asymmetry is a plausible, unmeasured confound on
+    the model comparison.
+    \item \textbf{Wrong-explanation rate not measured.} As in prior work,
+    whether a correctly-cited entry's justification text is actually
+    consistent with that entry's real content is not checked; a model could
+    cite the right id for a fabricated reason and this would not be
+    caught.
+    \item \textbf{Single run, no repeated trials.} Each sample was sent
+    once per (model, strategy) cell; no response-variability check was
+    performed.
+\end{itemize}
+
+\section{Future Work}
+
+In priority order: (1) re-run \texttt{csv\_flow\_experiment.py} once
+Claude API access resets (2026-09-01) to backfill the 387 missing trials --
+the harness is resumable and will retry only these, at no cost to the
+already-collected data; (2) given the per-class split
+(Section~\ref{sec:disc}), test whether a richer feature set (e.g.\
+including payload-derived features, where available) closes the gap on
+protocol-semantic classes, or whether that gap is fundamental to
+header/timing-only features; (3) expand the grounding corpus to cover the
+remaining 15 classes with real CAPEC/CVE entries, to distinguish "no
+entry to cite" from "entry exists but the model didn't find it" for those
+classes; (4) investigate the near-total abstention failure directly, e.g.\
+by testing whether an explicit "if uncertain, abstain" instruction change
+improves the 0.3--2.1\% rate; (5) repeat-sample multiple $N{=}40$ draws to
+put a variance estimate on the per-class accuracy figures; (6) extend this
+raw-feature protocol to the K3s CIS Self-Assessment Guide corpus under
+separate development in this project.
+
+\section{Conclusion}
+
+Removing the natural-language intermediary between raw evidence and the
+classifying model reveals two things the earlier, paraphrase-based version
+of this experiment could not: first, that this project's citation
+architecture, on raw 39-feature flow data, currently works well only for
+volumetric flood attacks and not at all for protocol-semantic or
+application-layer attacks, a mechanistic limit of the feature set rather
+than an arbitrary model weakness; second, that correct abstention -- the
+specific behavior citation-grounding exists to encourage -- is rare on this
+harder task (0.3--2.1\%), a materially worse result than this project has
+measured before and the clearest priority for future work. Claude
+significantly outperforms GPT-4o-mini on raw-feature correct-citation rate
+at both context strategies, but this report is explicit that its Claude
+numbers exclude four real classes entirely due to a disclosed, non-random
+data-collection gap (Section~\ref{sec:limitations}), and should be revised
+once that gap is closed rather than treated as final.
+
+\section*{Reproducibility Statement}
+
+Dataset: CIC-IoT-2023 CSV release, 34 classes, 309 files, 8.4~GB,
+46{,}776{,}697 rows, obtained and verified locally
+(Section~\ref{sec:dataset}). Sampling: \texttt{build\_flow\_sample.py
+--n-per-class 40 --seed 42}, producing \texttt{flow\_sample\_manifest.csv}
+(1{,}360 rows, frozen). Corpus and ground-truth mapping:
+\texttt{csv\_flow\_common.py}, reusing \texttt{real\_corpus.py}'s existing
+\texttt{attack\_families} field unchanged from prior work
+(Section~\ref{sec:corpus}). Experiment: \texttt{csv\_flow\_experiment.py},
+resumable/checkpointed execution against live \texttt{claude-sonnet-5} and
+\texttt{gpt-4o-mini} API calls, August 2026, per-trial output logged to
+\texttt{csv\_flow\_results.csv}. Analysis:
+\texttt{csv\_flow\_analysis.py}, producing \texttt{csv\_flow\_summary.csv}
+and \texttt{csv\_flow\_by\_class.csv} and the McNemar's-test output quoted
+in Section~\ref{sec:results}; this script explicitly excludes both
+API-error rows and any harness self-test (\texttt{--mock}) rows sharing the
+same output file from all real metrics, after both were found, during this
+paper's preparation, to silently distort results if left in (mock rows
+inflating apparent sample counts; error rows otherwise counted as incorrect
+citations). This report covers the 5{,}053 real trials that completed
+successfully as of the date in the title; 387 Claude trials remain pending
+an account usage-limit reset and are explicitly out of scope
+(Section~\ref{sec:limitations}), not silently included or extrapolated.
+
+\begin{thebibliography}{9}
+
+\bibitem[Bhaskaran et al.(2026)]{clearsight2026}
+Bhaskaran, A., Ponnavaikko, P., and Shiva, G.\ S.
+\textit{ClearSight: Citation-Grounded, Hallucination-Reduced IoT/OT Threat
+Detection}. 2026.
+
+\bibitem[Neto et al.(2023)]{neto2023ciciot2023}
+Neto, E.~C.~P., Dadkhah, S., Ferreira, R., Zohourian, A., Lu, R., and
+Ghorbani, A.~A.
+CICIoT2023: A real-time dataset and benchmark for large-scale attacks in
+IoT environment.
+\textit{Sensors}, 23(13), 5941, 2023.
+
+\bibitem[Majed et al.(2025)]{netflowviz}
+Majed, L., Layeghy, S., Pandey, Y., Kulatilleke, G., and Portmann, M.
+Multimodal LLMs for zero-shot intrusion detection using NetFlow
+visualisations.
+In \textit{Proc.\ IEEE 50th Conference on Local Computer Networks (LCN)},
+2025.
+
+\bibitem[Chandola et al.(2009)]{chandola2009anomaly}
+Chandola, V., Banerjee, A., and Kumar, V.
+Anomaly detection: A survey.
+\textit{ACM Computing Surveys}, 41(3), 1--58, 2009.
+
+\bibitem[Robertson and Zaragoza(2009)]{robertson2009bm25}
+Robertson, S. and Zaragoza, H.
+The Probabilistic Relevance Framework: BM25 and Beyond.
+\textit{Foundations and Trends in Information Retrieval}, 3(4), 2009.
+
+\bibitem[Deerwester et al.(1990)]{deerwester1990lsa}
+Deerwester, S., Dumais, S.\ T., Furnas, G.\ W., Landauer, T.\ K., and
+Harshman, R.
+Indexing by Latent Semantic Analysis.
+\textit{Journal of the American Society for Information Science}, 41(6),
+1990.
+
+\bibitem[MITRE(2026)]{capec}
+MITRE Corporation. Common Attack Pattern Enumeration and Classification
+(CAPEC). \url{https://capec.mitre.org}, accessed 2026.
+
+\bibitem[NIST(2026)]{nvd}
+National Institute of Standards and Technology. National Vulnerability
+Database (NVD). \url{https://nvd.nist.gov}, accessed 2026.
+
+\end{thebibliography}
+
+\end{document}
