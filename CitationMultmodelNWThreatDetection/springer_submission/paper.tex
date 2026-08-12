@@ -56,8 +56,8 @@ security telemetry, often justifying their verdicts with citations to named vuln
 attack patterns (CVE/CAPEC identifiers). We show that restricting an LLM's citation menu to a
 small, independently verified reference corpus measurably improves citation correctness, but
 that this technique's effect on \emph{classification} accuracy is not uniform across models --
-a finding only visible once a second model is tested at matched confirmatory scale. We render IoT
-network traffic from the real CIC-IoT-2023 dataset into four-panel visualizations and classify
+a finding only visible once a second model is tested at matched confirmatory scale. We render IoT network traffic
+from the real CIC-IoT-2023 dataset into four-panel visualizations and classify
 them under three prompting conditions (naive, text-grounded, and RAG-grounded, the last
 restricting citations to a 31-entry hand-verified CAPEC/CVE corpus) using two models: an initial
 Claude Sonnet pilot ($n=141$, 423 trials, all 34 classes, uneven per-class counts), and a
@@ -586,11 +586,11 @@ preprint.
 
 \section*{Acknowledgments}
 
-The author thanks the University of San Diego's Copley Library for open-access publishing
+The authors thank the University of San Diego's Copley Library for open-access publishing
 support under its institutional agreement with Springer Nature. Classification was performed
 using the Claude Sonnet API (Anthropic) and the GPT-4o-mini API (OpenAI); figures and statistical
 analysis used the open-source Python scientific stack (pandas, NumPy, scikit-learn, Matplotlib).
-The author also thanks the editor and anonymous reviewers for their time and feedback on this
+The authors also thank the editor and anonymous reviewers for their time and feedback on this
 manuscript.
 
 \section*{Declarations}
@@ -599,7 +599,7 @@ manuscript.
 for this article are supported by the University of San Diego's Copley Library under its
 institutional open-access agreement with Springer Nature.
 
-\paragraph{Conflict of interest.} The author declares no conflicts of interest or competing
+\paragraph{Conflict of interest.} The authors declare no conflicts of interest or competing
 interests relevant to the content of this article.
 
 \paragraph{Ethics approval and consent to participate.} Not applicable. This study did not
@@ -624,9 +624,9 @@ reasonable request and will be released in a public code repository upon publica
 
 \paragraph{Authors' contributions.} G.S.S. conceived and designed the study, built the
 experimental pipeline, ran the experiments, performed the analysis, and wrote the manuscript.
-P.S.U. contributed to the study. \emph{[Placeholder -- please confirm and refine P.S.U.'s specific
-contributions (e.g., review/editing, domain-expertise input, validation) before submission; CRediT
-taxonomy roles are recommended by the journal.]}
+P.S.U. identified and executed the Claude Sonnet confirmatory experimental run, verified and
+tracked run execution and data completeness, and contributed to documentation of the experimental
+methodology. Both authors reviewed and approved the final manuscript.
 
 \begin{thebibliography}{9}
 
