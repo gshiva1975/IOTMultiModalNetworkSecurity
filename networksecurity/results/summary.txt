@@ -7,27 +7,23 @@
 
   cve_text_grounded:
   citation_grade
-  real-and-correct                                                                              65
-  real-but-wrong-family                                                                         35
-  real-but-generic                                                                              29
-  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)     6
-  n/a-benign                                                                                     5
-  no-citation                                                                                    1
+  real-and-correct         70
+  real-but-wrong-family    36
+  real-but-generic         29
+  n/a-benign                5
+  no-citation               1
   Name: count, dtype: int64
-  -> real-and-correct rate among attack samples: 47.8% [39.6-56.1%] (n=136)
-  -> WARNING: 6 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+  -> real-and-correct rate among attack samples: 51.5% [43.1-59.7%] (n=136)
 
   naive:
   citation_grade
-  real-and-correct                                                                              58
-  real-but-wrong-family                                                                         37
-  real-but-generic                                                                              33
-  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)     6
-  n/a-benign                                                                                     5
-  no-citation                                                                                    2
+  real-and-correct         60
+  real-but-wrong-family    41
+  real-but-generic         33
+  n/a-benign                5
+  no-citation               2
   Name: count, dtype: int64
-  -> real-and-correct rate among attack samples: 42.6% [34.6-51.0%] (n=136)
-  -> WARNING: 6 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+  -> real-and-correct rate among attack samples: 44.1% [36.0-52.5%] (n=136)
 
   rag_grounded:
   citation_grade

@@ -23,6 +23,7 @@ Setup (once):
 import base64
 import csv
 import os
+import re
 import sys
 import time
 
@@ -94,9 +95,45 @@ def build_client():
     return OpenAI(api_key=api_key)
 
 
-def call_openai_model(client, model, prompt, img_uri, max_tokens=400, retries=4):
+_RETRY_AFTER_RE = re.compile(r"try again in ([\d.]+)(ms|s)\b", re.IGNORECASE)
+
+# Errors that mean "this account/key cannot make this call right now, no
+# matter how long you wait" -- retrying just burns the whole backoff budget
+# (up to ~4 minutes/call across 8 attempts) before failing anyway. Fail fast
+# instead so the harness moves on and logs one clean ERROR row per call.
+_FATAL_ERROR_MARKERS = (
+    "insufficient_quota", "credit_balance_exhausted", "invalid_api_key",
+    "account_deactivated",
+)
+
+
+class FatalAPIError(RuntimeError):
+    pass
+
+
+def _suggested_wait(e, attempt):
+    """OpenAI's own 429 responses tell you exactly how long to wait (e.g.
+    'Please try again in 625ms') -- almost always well under a second for a
+    per-minute TOKEN rate limit, since the window just needs to roll forward
+    slightly. Respecting that instead of a blanket multi-second exponential
+    backoff is the difference between a run that finishes in minutes and one
+    that stalls for an hour when calls are landing right at the TPM ceiling.
+    Falls back to the old backoff (capped at 30s) for errors with no hint,
+    e.g. genuine server errors."""
+    msg = str(e)
+    m = _RETRY_AFTER_RE.search(msg)
+    if m:
+        value, unit = float(m.group(1)), m.group(2).lower()
+        wait = value / 1000.0 if unit == "ms" else value
+        return round(wait + 0.25, 2)  # small safety margin
+    return min(30, 2 ** attempt * 3)
+
+
+def call_openai_model(client, model, prompt, img_uri, max_tokens=400, retries=8):
     """Call an OpenAI vision model via chat.completions, with retry/backoff
-    for transient rate-limit / server errors."""
+    for transient rate-limit / server errors. Retries are higher (8) than a
+    typical backoff scheme because most retries here are sub-second waits on
+    a per-minute token-rate-limit, not real failures."""
     last_err = None
     for attempt in range(retries):
         try:
@@ -113,10 +150,16 @@ def call_openai_model(client, model, prompt, img_uri, max_tokens=400, retries=4)
             )
             return completion.choices[0].message.content, completion.usage
         except Exception as e:
+            diag = describe_exception(e)
+            if any(marker in diag.lower() for marker in _FATAL_ERROR_MARKERS):
+                raise FatalAPIError(
+                    f"Non-retryable account error calling {model}: {diag}\n"
+                    f"    This will not resolve by waiting -- fix the account issue "
+                    f"(e.g. add billing credits) then re-run the script; already-completed "
+                    f"calls are preserved and will be skipped.")
             last_err = e
-            wait = min(30, 2 ** attempt * 3)
-            print(f"    (retry {attempt + 1}/{retries} after error: "
-                  f"{describe_exception(e)}; waiting {wait}s)")
+            wait = _suggested_wait(e, attempt)
+            print(f"    (retry {attempt + 1}/{retries} after error: {diag}; waiting {wait}s)")
             time.sleep(wait)
     raise RuntimeError(f"Exhausted retries calling {model}: {describe_exception(last_err)}")
 
@@ -225,6 +268,12 @@ def run_harness(manifest, limit, class_names, out_dir, model="gpt-4o", resume=Tr
                         "output_tokens": getattr(usage, "completion_tokens", 0),
                         "raw_response": (text or "").replace("\n", " | "),
                     }
+                except FatalAPIError as e:
+                    print(f"\nSTOPPING: {e}")
+                    print(f"Progress so far this run is saved in {out_path} -- "
+                          f"re-run the same command after fixing the account issue and it "
+                          f"will resume from here.")
+                    return pd.DataFrame(rows, columns=RESULT_COLUMNS)
                 except Exception as e:
                     sid = row.get("sample_id", "UNKNOWN_SAMPLE")
                     tc = row.get("true_class", "UNKNOWN_CLASS")

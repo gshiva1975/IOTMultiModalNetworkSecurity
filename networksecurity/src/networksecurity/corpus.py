@@ -43,6 +43,18 @@ CVE_CORPUS = {
             ),
             "source_url": "https://nvd.nist.gov/vuln/detail/CVE-2017-17215",
         },
+        # --- From the n=1,020 Claude Sonnet confirmatory run (results_1000_v2/harness_results.csv).
+        {
+            "cve_id": "CVE-2007-6750",
+            "attack_families": ["DDoS-SlowLoris"],
+            "description": (
+                "The Apache HTTP Server 1.x and 2.x allows remote attackers to cause a denial of "
+                "service (daemon outage) via partial HTTP requests, as demonstrated by Slowloris. "
+                "This is the actual, named Slowloris vulnerability -- an exact match for the "
+                "DDoS-SlowLoris class."
+            ),
+            "source_url": "https://nvd.nist.gov/vuln/detail/CVE-2007-6750",
+        },
     ],
 
     # Verified against capec.mitre.org.
@@ -172,6 +184,47 @@ CVE_CORPUS = {
         {"capec_id": "CAPEC-86", "name": "XSS Through HTTP Headers", "attack_families": ["XSS"],
          "description": "Cross-Site Scripting technique that injects script via HTTP headers.",
          "source_url": "https://capec.mitre.org/data/definitions/86.html"},
+        # --- Added after a second-pass audit of the 7 "UNVERIFIED" reference IDs surfaced by
+        # the 141-sample real pilot run (results/harness_results.csv). Each was independently
+        # re-fetched from capec.mitre.org (not from memory) and graded by reading its actual
+        # description against the true_class it was cited for.
+        {"capec_id": "CAPEC-16", "name": "Dictionary-based Password Attack",
+         "attack_families": ["DictionaryBruteForce"],
+         "description": "An attacker tries each word in a dictionary as a password to gain access "
+                         "to an account; explicitly described by MITRE as a specific instance of the "
+                         "Password Brute Forcing pattern (CAPEC-49). Exact match for DictionaryBruteForce.",
+         "source_url": "https://capec.mitre.org/data/definitions/16.html"},
+        {"capec_id": "CAPEC-556", "name": "Replace File Extension Handlers",
+         "attack_families": ["Backdoor_Malware"],
+         "description": "An adversary modifies a system's file-extension handler so that opening a "
+                         "given file type silently launches an attacker-chosen program instead -- a "
+                         "persistence/backdoor-execution mechanism (ChildOf CAPEC-542 Targeted Malware), "
+                         "consistent with the Backdoor_Malware family.",
+         "source_url": "https://capec.mitre.org/data/definitions/556.html"},
+        {"capec_id": "CAPEC-311", "name": "DEPRECATED: OS Fingerprinting",
+         "attack_families": ["Recon-OSScan"],
+         "description": "Topically an exact match for OS-fingerprinting recon (same technique as "
+                         "Recon-OSScan), but MITRE has DEPRECATED this ID -- it now redirects to "
+                         "CAPEC-312 (Active OS Fingerprinting) or CAPEC-313 (Passive OS Fingerprinting). "
+                         "Graded real-and-correct on topical match, with this deprecation flagged "
+                         "explicitly in the paper as a distinct citation-quality issue from fabrication.",
+         "source_url": "https://capec.mitre.org/data/definitions/311.html"},
+        # --- From the n=1,020 Claude Sonnet confirmatory run (results_1000_v2/harness_results.csv,
+        # naive + text-grounded conditions). Each independently re-fetched from capec.mitre.org.
+        {"capec_id": "CAPEC-579", "name": "Replace Winlogon Helper DLL",
+         "attack_families": ["Backdoor_Malware"],
+         "description": "Modifies a Windows registry key so Winlogon loads an adversary-chosen DLL "
+                         "at every login -- a persistence/backdoor-execution technique (ChildOf "
+                         "CAPEC-542 Targeted Malware; maps to ATT&CK T1547.004 Boot or Logon Autostart "
+                         "Execution: Winlogon Helper DLL). Exact match for Backdoor_Malware.",
+         "source_url": "https://capec.mitre.org/data/definitions/579.html"},
+        {"capec_id": "CAPEC-285", "name": "ICMP Echo Request Ping",
+         "attack_families": ["Recon-PingSweep"],
+         "description": "Sends ICMP Type 8 Echo Request ('Ping') to determine if a target is "
+                         "responsive; MITRE's own description states 'performing this operation for a "
+                         "range of hosts on the network is known as a Ping Sweep.' Exact match for "
+                         "Recon-PingSweep.",
+         "source_url": "https://capec.mitre.org/data/definitions/285.html"},
     ],
 
     # Real, verified, but generic/parent-level patterns -- always graded "real-but-generic"
@@ -235,6 +288,90 @@ CVE_CORPUS = {
         "CAPEC-639": "Probe System Files -- reads improperly protected local files, unrelated to ICMP flooding",
         "CAPEC-64": "Using Slashes and URL Encoding to Bypass Validation Logic -- encoding/path-traversal bypass, distinct from command injection",
         "CVE-2000-0428": "Buffer overflow RCE in InterScan Virus Wall's SMTP gateway (2000) -- unrelated to a TCP flood DDoS",
+        # From the second-pass UNVERIFIED-ID audit (see capec_entries comment above for CAPEC-16/556/311).
+        "CAPEC-178": "Cross-Site Flashing -- exploits legacy Flash Player SWF file references via a crafted "
+                     "link, unrelated to general Browser Hijacking",
+        "CAPEC-608": "Cryptanalysis of Cellular Encryption -- breaks GSM/UMTS cellular encryption (A5/1, "
+                     "A5/2) to read cellular traffic, unrelated to browser hijacking",
+        "CAPEC-505": "Scheme Squatting -- a malicious mobile app registers a URL scheme to intercept "
+                     "messages meant for another app; a distinct mobile-OS mechanism from browser "
+                     "session/config hijacking",
+        "CAPEC-89": "Pharming -- DNS/hosts-file poisoning to redirect users to a fake trusted site for "
+                    "credential theft, unrelated to ICMP fragmentation flooding",
+        # From the n=1,020, 34-class GPT-4o-mini confirmatory run (results_1000_v2/). Unlike the
+        # Claude pilot's 7 unrecognized IDs (each cited a handful of times, for topically
+        # coherent classes), these are the most-frequently-cited unrecognized IDs and each one
+        # is scattered across 9-24 DIFFERENT, mostly topically-unrelated classes (floods, recon,
+        # injection, spoofing all mixed together for the same ID) -- a real, verified, but
+        # indiscriminately-applied citation pattern, not a specific match for any of them.
+        # Each ID below is real and independently confirmed against capec.mitre.org / nvd.nist.gov.
+        "CAPEC-138": "Reflection Injection -- a code/reflection-based injection technique (ChildOf "
+                     "Parameter Injection); cited across DDoS floods, Mirai, and recon scans with no "
+                     "topical connection to any of them",
+        "CAPEC-118": "Collect and Analyze Information -- a broad CAPEC *category* (not a technique), "
+                     "topically plausible only for the recon-type classes among the 15 it was cited for; "
+                     "majority (floods, injection) are mismatched",
+        "CAPEC-100": "Overflow Buffers -- a memory-corruption technique; cited across DDoS floods, "
+                     "recon scans, and spoofing classes with no topical connection to any of them",
+        "CVE-2021-22986": "F5 BIG-IP iControl REST unauthenticated RCE (2021) -- product-specific "
+                           "vulnerability, unrelated to any of the flood/backdoor/SQLi classes it was cited for",
+        "CAPEC-147": "XML Ping of the Death -- an XML-specific resource-depletion flood; cited across "
+                     "recon, spoofing, and backdoor classes with no XML/web-service connection",
+        "CAPEC-136": "LDAP Injection -- a specific injection technique; cited across DDoS floods and "
+                     "recon scans with no LDAP/injection connection",
+        "CAPEC-104": "Cross Zone Scripting -- a browser security-zone privilege-escalation technique; "
+                     "cited across network floods, recon, and spoofing classes with no browser connection",
+        "CAPEC-132": "Symlink Attack -- a local filesystem race-condition technique; cited across network "
+                     "floods and recon scans with no local-filesystem-access connection",
+        "CAPEC-133": "Try All Common Switches -- CLI/application option-fuzzing; cited across network "
+                     "floods and recon scans with no application-interface connection",
+        "CAPEC-153": "Input Data Manipulation -- a meta-level input-format-manipulation pattern; cited "
+                     "across network floods and recon scans with no input-processing connection",
+        "CAPEC-123": "Buffer Manipulation -- a meta-level parent of buffer attacks; cited across network "
+                     "floods and recon scans with no buffer-interaction connection",
+        "CAPEC-146": "XML Schema Poisoning -- an XML-specific schema-tampering technique; cited across "
+                     "network floods and backdoor classes with no XML connection",
+        "CAPEC-152": "Inject Unexpected Items -- a broad injection *category*; cited across network "
+                     "floods and recon scans with no injection connection",
+        "CAPEC-143": "Detect Unpublicized Web Pages -- a web-recon technique; cited across network floods "
+                     "and backdoor classes with no web-application connection",
+        "CAPEC-116": "Excavation -- a broad recon meta-pattern; cited across DDoS floods, uploads, and XSS "
+                     "with no active-probing connection for most",
+        "CAPEC-140": "Bypassing of Intermediate Forms in Multiple-Form Sets -- a web multi-step-form "
+                     "bypass technique; cited across network floods and MITM classes with no web-form "
+                     "connection",
+        "CVE-2020-0601": "Windows CryptoAPI ECC certificate-spoofing vulnerability ('CurveBall', 2020) -- "
+                          "product-specific vulnerability, unrelated to any of the flood/backdoor/SQLi "
+                          "classes it was cited for",
+        # From the n=1,020 Claude Sonnet confirmatory run (results_1000_v2/harness_results.csv,
+        # naive + text-grounded conditions, cited for Backdoor_Malware and BrowserHijacking).
+        # Each independently re-fetched from capec.mitre.org / nvd.nist.gov.
+        "CAPEC-114": "Authentication Abuse -- a meta pattern for gaining certified-user access via "
+                     "flawed authentication logic (e.g. reflection attacks), not a malware/backdoor "
+                     "mechanism",
+        "CAPEC-582": "Route Disabling -- severs a network route (e.g. an 'Internet kill switch'), an "
+                     "availability-obstruction pattern unrelated to backdoor malware",
+        "CAPEC-616": "Establish Rogue Location -- hosts a malicious resource at a look-alike location "
+                     "and waits for a victim to visit it (phishing/social-engineering setup), distinct "
+                     "from actively hijacking a browser process or session",
+        "CAPEC-694": "System Location Discovery -- collects keyboard layout/language/timezone to infer "
+                     "a target's geography; a recon technique unrelated to browser hijacking",
+        "CAPEC-611": "BitSquatting -- registers a domain one bit different from a trusted one to catch "
+                     "misdirected traffic from memory errors; a narrow domain-registration technique, "
+                     "not the browser-hijacking mechanism itself",
+        "CAPEC-561": "Windows Admin Shares with Stolen Credentials -- uses stolen admin credentials to "
+                     "reach hidden Windows network shares (C$/ADMIN$/IPC$) for lateral file transfer/"
+                     "execution; a credential/lateral-movement technique, not backdoor malware itself",
+        "CAPEC-586": "Object Injection -- exploits deserialization of untrusted data for RCE; a generic "
+                     "software-injection technique unrelated to browser hijacking",
+        "CAPEC-247": "XSS Using Invalid Characters -- a Cross-Site Scripting bypass technique; XSS is "
+                     "its own distinct class in this taxonomy, not BrowserHijacking",
+        "CAPEC-506": "Tapjacking -- overlays a malicious UI on a mobile app to hijack taps; a "
+                     "mobile-specific clickjacking technique, distinct from browser session hijacking",
+        "CAPEC-543": "Counterfeit Websites -- creates duplicate/fake websites to harvest data or push "
+                     "malware; a phishing-adjacent social-engineering technique, not browser hijacking",
+        "CAPEC-531": "Hardware Component Substitution -- physically swaps in malicious hardware; "
+                     "completely unrelated to a network-layer UDP fragmentation flood",
     },
 }
 

@@ -1,0 +1,4 @@
+
+=== Non-LLM baseline detectors (Wilson 95% CI on recall) ===
+   Rolling z-score: acc=0.30 precision=1.00 recall=28.4% [25.7-31.3%] (n=990) f1=0.44 (TP=281 FP=0 FN=709 TN=30)
+  Isolation Forest: acc=0.56 precision=1.00 recall=54.2% [51.1-57.3%] (n=990) f1=0.70 (TP=537 FP=0 FN=453 TN=30)

@@ -1,0 +1,42 @@
+=== GPT-4o classification accuracy by condition (Wilson 95% CI) ===
+   cve_text_grounded: 85.7% [83.4-87.7%] (n=1020)
+               naive: 88.2% [86.1-90.1%] (n=1020)
+        rag_grounded: 70.5% [67.6-73.2%] (n=1020)
+
+=== Citation quality by condition (counts, and 95% CI on 'real-and-correct' rate among attack samples) ===
+
+  cve_text_grounded:
+  citation_grade
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)    678
+  no-citation                                                                                   130
+  real-but-wrong-family                                                                         105
+  real-but-generic                                                                               74
+  n/a-benign                                                                                     30
+  real-and-correct                                                                                3
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 0.3% [0.1-0.9%] (n=990)
+  -> WARNING: 678 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+
+  naive:
+  citation_grade
+  no-citation                                                                                   482
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)    404
+  real-but-wrong-family                                                                          59
+  real-but-generic                                                                               42
+  n/a-benign                                                                                     30
+  real-and-correct                                                                                3
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 0.3% [0.1-0.9%] (n=990)
+  -> WARNING: 404 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+
+  rag_grounded:
+  citation_grade
+  real-and-correct                                                                              565
+  real-but-wrong-family                                                                         197
+  no-citation                                                                                   132
+  real-but-generic                                                                               94
+  n/a-benign                                                                                     30
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)      2
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 57.1% [54.0-60.1%] (n=990)
+  -> WARNING: 2 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
