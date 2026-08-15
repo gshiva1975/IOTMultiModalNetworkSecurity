@@ -1,0 +1,636 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{authblk}
+\usepackage{caption}
+\usepackage{tabularx}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\title{Does the Picture Matter?\\
+Image Representation as an Unstudied Variable in\\
+Citation-Grounded Multimodal LLM Classification of IoT Network Traffic}
+
+\author[1]{Gangadhar Singh Shiva\thanks{Corresponding author: \texttt{gshiva@sandiego.edu}}}
+\author[2]{Poonam Singh Umakanth\thanks{\texttt{poonam.singh5@gmail.com}}}
+\affil[1]{University of San Diego}
+\affil[2]{HPE Juniper Networking, Hewlett Packard Enterprise}
+
+\date{August 2026}
+
+\begin{document}
+\maketitle
+\sloppy
+
+\begin{abstract}
+Prior work has shown that restricting a multimodal LLM's citation menu to a small, verified
+reference corpus (retrieval-augmented, or ``RAG-grounded'' prompting) measurably reduces citation
+hallucination when classifying IoT network traffic rendered as images, but that this effect can
+interact with classification accuracy in model-dependent ways. That work held the \emph{image
+representation} fixed -- a single four-panel composite chart (packet rate, TCP flag composition,
+protocol mix, packet-size statistics) -- and varied only the prompting condition. This paper asks
+the complementary question: with prompting condition held fixed at RAG-grounded, does the visual
+\emph{encoding} of the identical underlying traffic data change how much the model hallucinates its
+citations? We propose and implement a six-way image-representation comparison spanning a
+deliberate annotation gradient -- from a fully labeled, legended four-panel chart, through a
+single-channel line plot and a features$\times$time heatmap, to two representations with zero
+textual annotation (a pairwise-similarity recurrence plot and a raw numeric-to-pixel grayscale
+matrix) -- plus a sixth representation along a genuinely different axis: a 3-channel (red/green/blue)
+numeric-to-pixel encoding that is 3-dimensional (height $\times$ width $\times$ channel) rather than
+a 2D grid rendered through a colormap, mirroring multi-channel CNN-based intrusion-detection
+encodings. All six hold constant the dataset (CIC-IoT-2023), the two models under test (Qwen-vl-plus
+and GPT-4o-mini), the citation corpus, the grading rubric, and the prompting condition. To
+our knowledge, no prior work has treated image-representation choice as an independent variable
+for citation hallucination specifically, as distinct from the adjacent (but different) literatures
+on time-series-to-image encoding for CNN-based intrusion detection and on vision-encoder-level
+causes of multimodal LLM hallucination. This paper specifies the full experimental design, releases
+working, resumable experiment code (six representation renderers, a fixed RAG-grounded prompting
+harness for three model APIs, and citation-grading infrastructure reused unchanged from the prior
+study), and reports results from a real, completed run against CIC-IoT-2023 ($n=1{,}020$ windows,
+10 classes, 6 representations, 6,120 calls per model). Both models show a sharp, non-monotonic split:
+three annotated representations (four\_panel, single\_line, heatmap) sustain 42--80\% classification
+accuracy and 31--62\% correct-citation rates, while the three unannotated/dimensionality-varying
+representations (recurrence\_plot, grayscale\_matrix, rgb\_stack) collapse to chance-level accuracy
+($\approx$10\%, matching the 10-class base rate) for both models. Critically, this collapse is not a
+retreat into honest uncertainty: both models continue to volunteer confident citations at low
+unannotated-representation no-citation rates (0--16\%), and Qwen-vl-plus's collapse is total --
+identical classification and citation output on literally every one of the 3,060 unannotated-image
+calls, regardless of the true class. This is evidence for hallucination-through-fabrication (a
+variant of H1) rather than hallucination-through-elaboration (H2): stripping annotation does not make
+either model behave more conservatively, it makes both models guess with undiminished confidence.
+\end{abstract}
+
+\section{Introduction}
+
+A companion study~\cite{groundingcitation2026} established that when a multimodal LLM classifies
+IoT network traffic rendered as an image and is asked to justify its classification with a
+CVE/CAPEC citation, restricting the model's citation menu to a small, independently verified
+reference corpus (RAG-grounded prompting) substantially improves citation correctness relative to
+letting the model cite from its own training-time knowledge. That study varied \emph{prompting
+condition} -- naive, text-grounded, or RAG-grounded -- while holding the image representation fixed
+at a single four-panel composite chart designed for human readability: labeled axes, a legend on
+every panel, and a title. That choice was reasonable for a first study, but it leaves a distinct
+question unanswered: is a citation grounding technique's effectiveness a property of the
+\emph{prompt}, or does it also depend on the \emph{image} -- specifically, on how much visual
+annotation and semantic scaffolding that image carries?
+
+This question matters practically. Real-world traffic-visualization pipelines will not all render
+the same labeled four-panel chart a research paper does; some will produce minimal single-channel
+plots, some will produce dense feature-matrix heatmaps for compact dashboards, and some -- notably,
+representations borrowed from the CNN-based network-intrusion-detection literature, where
+raw-byte and pairwise-similarity encodings are common precisely because they need no human-readable
+annotation -- will produce images with no textual scaffolding at all. If citation hallucination
+rates vary substantially across these encodings, then a grounding technique validated on one
+representation cannot be assumed to transfer to a deployment that renders traffic differently, and
+representation choice becomes a first-class design decision for any citation-grounded multimodal
+LLM security pipeline, not an incidental implementation detail.
+
+\paragraph{Two competing hypotheses.} We see no clear a priori winner between two plausible
+mechanisms, which is itself part of the motivation for running the comparison rather than assuming
+an answer:
+
+\begin{itemize}
+\item \textbf{H1 -- annotation helps grounding.} A richly labeled image (axis labels, a legend
+naming each traffic feature, a title) gives the model concrete, nameable visual anchors to tie a
+citation to (``the TCP flag composition panel shows sustained SYN dominance, consistent with
+CAPEC-482''). Stripping that annotation removes those anchors, so the model may fall back on
+generic or fabricated justifications more often under low-annotation representations.
+\item \textbf{H2 -- annotation invites elaboration, and elaboration invites hallucination.} A
+richly annotated image may instead prompt a longer, more confident-sounding justification that
+reaches further from the verified corpus text -- the same failure mode long-form RAG evaluations
+call over-elaboration~\cite{factum2026}. A sparse, unlabeled image may instead push the model toward
+shorter, more conservative responses (including more frequent, and appropriately honest,
+N/A-citation answers), which would show up as \emph{lower} apparent citation-quality problems simply
+because the model volunteers fewer citations to grade in the first place.
+\end{itemize}
+
+Section~\ref{sec:related} distinguishes this question from the two literatures it sits between.
+Section~\ref{sec:methods} specifies the six representations, the fixed prompting condition, and the
+full experimental protocol. Section~\ref{sec:results} reports results from a completed run against
+the real CIC-IoT-2023 dataset. Section~\ref{sec:discussion} discusses what the observed pattern
+implies for H1 and H2, and Section~\ref{sec:limitations} states this study's scope limits.
+
+\paragraph{Contributions.}
+\begin{itemize}
+\item \textbf{A novel, isolated independent variable.} We hold prompting condition, dataset,
+models, citation corpus, and grading rubric fixed and vary only image representation -- to our
+knowledge the first study to treat traffic-image encoding as an independent variable for citation
+hallucination specifically (see Section~\ref{sec:related} for how this differs from adjacent
+image-encoding-for-IDS and MLLM-hallucination-causes literatures).
+\item \textbf{A deliberate annotation gradient, plus a dimensionality axis.} Five representations
+spanning full annotation to none, letting us distinguish an information-content effect (fewer
+channels shown) from a pure annotation effect (same channels, no labels); a sixth, unannotated
+representation (\texttt{rgb\_stack}) instead varies dimensionality itself -- a genuinely
+3-dimensional (height $\times$ width $\times$ channel) encoding rather than a further step along the
+2D annotation gradient.
+\item \textbf{Reused, not re-derived, evaluation infrastructure.} The citation corpus and grading
+rubric are the exact modules from the prior study~\cite{groundingcitation2026}, so any observed
+representation effect cannot be an artifact of a differently calibrated grader.
+\item \textbf{Working, resumable experiment code}, released alongside this paper, so the results
+reported below can be reproduced or extended by re-running two scripts against the public
+CIC-IoT-2023 dataset.
+\end{itemize}
+
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Time-series- and traffic-to-image encoding.} Rendering a time series as an image for
+downstream CNN classification is an established technique. Wang and Oates~\cite{wang2015gaf}
+introduced Gramian Angular Fields and Markov Transition Fields for encoding univariate time series
+as images; recurrence plots -- the pairwise-similarity encoding we adopt as one of our six
+representations -- are a related, older technique from nonlinear dynamics later adopted for the
+same purpose. In the malware-analysis literature, Nataraj et al.~\cite{nataraj2011malware}
+introduced the raw-byte grayscale encoding we adopt as another unlabeled representation, showing
+that a file's raw bytes, reshaped into a 2D grayscale image with no semantic annotation, preserve
+enough family-level visual texture for classification. Within network security specifically, this
+same idea has been applied directly to traffic: time-series imaging has been used for wireless
+link-layer anomaly detection~\cite{wirelessimaging2021}, and multiple recent CNN-based intrusion
+detection systems encode flow features into 2D or multi-channel images, including a byte-level
+flow-to-image encoding~\cite{byteflow2026} and CiNeT, a bijective, interpretable
+encoding-decoding framework between network traffic features and RGB image representations
+specifically~\cite{bijective2025} -- the direct precedent for our sixth representation,
+\texttt{rgb\_stack}, which similarly stacks distinct feature groups as color channels rather than
+rendering them as a single-channel 2D grid. All of this work, however, targets a \emph{CNN trained
+end-to-end} on the resulting images for a classification label; none of it asks how a
+general-purpose, zero-shot \emph{multimodal LLM} presented with these same encodings behaves, and
+in particular none of it studies citation behavior, since a trained CNN classifier does not
+generate citations at all. This paper borrows three of its six representations (recurrence plot,
+raw grayscale matrix, RGB stack) directly from this literature's precedent, but asks a question
+that literature has no mechanism to ask.
+
+\paragraph{Multimodal LLM hallucination.} A substantial and growing literature studies why
+multimodal LLMs hallucinate, surveyed comprehensively by Liu et al.~\cite{mllmhallucsurvey2024}.
+Documented causes include vision-encoder limitations (resolution, salience bias), imbalanced
+attention across visual tokens, spurious visual correlations, and a modality imbalance in which a
+dominant language model overrides weaker visual evidence. This literature studies hallucination as
+a property of \emph{how the model processes a given image} -- decoding strategy, attention
+distribution, encoder architecture -- not as a property of \emph{which image, among several
+alternative renderings of the same underlying data, the model was shown in the first place}. It
+therefore does not directly address whether swapping a chart's visual encoding, with the model,
+dataset, and prompt held fixed, changes citation-hallucination rates; that is the gap this paper
+targets.
+
+\paragraph{Citation hallucination and grounding.} The companion study~\cite{groundingcitation2026}
+this paper extends showed that RAG-grounded prompting -- restricting a model's citation menu to a
+small, independently verified corpus supplied in-context, in the spirit of
+Lewis et al.'s retrieval-augmented generation~\cite{lewis2020retrieval} -- measurably improves
+citation correctness for IoT traffic classification, replicated across two models at matched
+$n=1{,}020$ scale, though with a model-dependent effect on raw classification accuracy traced to a
+category-specific instance of the broader ``contextual distraction'' phenomenon documented in other
+RAG evaluations~\cite{adaptivedistraction2025}. Mechanistic citation-hallucination detection has
+also been studied directly in long-form RAG text generation~\cite{factum2026}. All of this prior
+work, including our own companion study, holds image representation fixed. This paper is, to our
+knowledge, the first to vary it while holding the grounding technique constant.
+
+\section{Methodology}
+\label{sec:methods}
+
+\subsection{Dataset and traffic windows}
+
+We reuse the real CIC-IoT-2023 dataset~\cite{cic-iot-2023}, the same public benchmark used in the
+companion study, and the identical windowing procedure: each classified unit is a
+\texttt{GROUP\_SIZE=30}-row window of the dataset's per-flow feature aggregation (each row already
+summarizes $\sim$100 packets, so each window covers $\sim$3,000 packets), sampled without
+replacement per class-file via a fixed random seed (\texttt{RNG = numpy.random.default\_rng(7)}),
+identical to the companion study's sampling code. Reusing the exact windowing logic means any
+representation effect we observe cannot be attributed to a different sampling procedure.
+
+\subsection{Six image representations}
+\label{sec:representations}
+
+All six representations are computed from the identical underlying feature set for a given window
+-- packet rate, five TCP-flag fractions (FIN/SYN/RST/PSH/ACK), six protocol-mix fractions
+(TCP/UDP/HTTP/HTTPS/ICMP/DNS), and average/standard-deviation packet size (fourteen channels total)
+-- so only the \emph{visual encoding} varies, not the information available to the model. The first
+five are ordered deliberately along an annotation gradient, from full labeling to none; the sixth
+(\texttt{rgb\_stack}) instead varies dimensionality, encoding three feature groups as the
+red/green/blue channels of one color image rather than as a single-channel 2D grid:
+
+\begin{enumerate}
+\item \textbf{four\_panel.} The companion study's original composite: four stacked, labeled
+subplots (rate line, flag-composition lines with a legend, a protocol-mix stacked area with a
+legend, and avg/std packet-size lines with a legend), with a descriptive title. Richest annotation;
+serves as the replication baseline against the companion study.
+\item \textbf{single\_line.} A single labeled line plot of packet rate only -- the same annotation
+richness as one panel of \texttt{four\_panel}, but with only one of the fourteen feature channels
+shown. Included to separate an \emph{information-reduction} effect (fewer channels) from a pure
+\emph{annotation-reduction} effect, which the remaining four representations isolate by keeping all
+fourteen channels.
+\item \textbf{heatmap.} A features$\times$time heatmap: each of the fourteen feature channels is a
+labeled row, each window-step is a column, color (with a colorbar) encodes the per-feature
+min-max-normalized value. Same information content as \texttt{four\_panel}, denser and differently
+encoded, still fully annotated (row labels, axis label, colorbar).
+\item \textbf{recurrence\_plot.} A square, entirely unlabeled grayscale image in which pixel
+$(i,j)$ encodes the normalized Euclidean distance between window-step $i$'s and window-step $j$'s
+full (per-feature-normalized) fourteen-dimensional feature vector. No axis labels, legend, or
+colorbar. Encodes temporal self-similarity structure rather than raw feature values directly.
+\item \textbf{grayscale\_matrix.} A raw numeric-to-pixel grayscale image: rows are window-steps,
+columns are the same fourteen feature channels in a fixed order, pixel brightness is that feature's
+per-channel min-max-normalized value. No axis labels, legend, or colorbar of any kind -- the direct
+network-traffic analogue of the raw-byte malware-image encoding~\cite{nataraj2011malware}. Like
+\texttt{recurrence\_plot}, this representation is 2-dimensional (height $\times$ width, 1 channel).
+\item \textbf{rgb\_stack.} A 3-channel (red/green/blue) numeric-to-pixel image: red encodes packet
+rate and the five TCP-flag fractions, green encodes the six protocol-mix fractions, and blue
+encodes average/std packet size (zero-padded from two to six columns so all three channels share
+one width); each channel is independently min-max-normalized before being stacked, the way a
+standard color photograph combines three separate grayscale channels. No axis labels, legend, or
+colorbar. Unlike the other five representations, this one is genuinely 3-dimensional (height
+$\times$ width $\times$ 3 channels) rather than a 2D grid rendered through a colormap -- the direct
+network-traffic analogue of CiNeT's bijective network-to-RGB-image encoding~\cite{bijective2025}.
+\end{enumerate}
+
+Table~\ref{tab:representations} summarizes all six at a glance -- annotation level, dimensionality,
+how many of the fourteen feature channels each one shows, and what each is designed to isolate in
+the analysis.
+
+\begin{table}[htbp]
+\centering
+\caption{The six image representations: annotation, dimensionality, information content, and
+purpose. All show the identical underlying traffic window.}
+\label{tab:representations}
+\small
+\begin{tabularx}{\textwidth}{l l l X}
+\toprule
+Representation & Annotation & Dimensionality & Purpose \\
+\midrule
+four\_panel & Full & 2D, 4 subplots & Replication baseline against the companion study. \\
+single\_line & Full, 1/14 channels & 2D, 1 channel & Separates an information-reduction effect
+(fewer channels) from a pure annotation effect. \\
+heatmap & Full & 2D, 1 channel & Same information as four\_panel, denser encoding, still fully
+labeled. \\
+recurrence\_plot & None & 2D, 1 channel & Encodes temporal self-similarity rather than raw values;
+first fully unlabeled representation. \\
+grayscale\_matrix & None & 2D, 1 channel & Direct numeric-to-pixel encoding, no annotation of any
+kind -- network-traffic analogue of raw-byte malware images~\cite{nataraj2011malware}. \\
+rgb\_stack & None & \textbf{3D}, 3 channels & Varies dimensionality itself rather than annotation --
+tests whether packing information into color channels helps once labels are stripped away. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Exact rendering code is in \texttt{src/imgrep/visualization\_variants.py}, released with this paper.
+Figure~\ref{fig:reps} shows all six representations rendered from one identical sampled CIC-IoT-2023
+window (a benign traffic sample), generated by \texttt{scripts/generate\_figures.py} directly from
+the real \texttt{viz/} output of the confirmatory run.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_representations_example.png}
+\caption{The six image representations compared in this study, rendered from the identical
+underlying traffic window (sample \texttt{Benign\_Final\_0000}). Left to right: full annotation
+(\texttt{four\_panel}, \texttt{single\_line}, \texttt{heatmap}) through zero annotation
+(\texttt{recurrence\_plot}, \texttt{grayscale\_matrix}, \texttt{rgb\_stack}).}
+\label{fig:reps}
+\end{figure}
+
+\subsection{Fixed prompting condition}
+
+Every call in this study uses a single, fixed prompting condition: RAG-grounded, restricting the
+model's citation menu to the same 31-entry hand-verified CAPEC/CVE corpus used and released by the
+companion study~\cite{groundingcitation2026}, reused here unchanged
+(\texttt{src/imgrep/corpus.py}). We chose RAG-grounded specifically because the companion study
+found it the condition with the best citation-correctness properties for both models tested; testing
+representation effects against the strongest-known grounding technique, rather than the weakest, is
+the more informative and more conservative test -- if representation still moves citation quality
+substantially even under the best available grounding, that is the stronger and more actionable
+finding. Because each representation needs its own short caption describing what the image shows
+and how to read it (necessary for \texttt{recurrence\_plot}, \texttt{grayscale\_matrix}, and
+\texttt{rgb\_stack}, which carry no in-image annotation at all), the only text that varies across
+the six per-representation prompts is that one caption; the classification instructions, the full
+serialized reference corpus, the citation restriction (``cite ONLY a reference ID from the database
+above''), and the required response format are byte-identical across all six
+(\texttt{src/imgrep/prompting.py}, unit-tested in \texttt{tests/test\_prompting.py}).
+
+\subsection{Models and scale}
+
+We run the identical (sample, representation) manifest against two models: Qwen-vl-plus (Alibaba,
+via DashScope) and GPT-4o-mini (OpenAI), via \texttt{scripts/run\_pipeline\_qwen.py} and
+\texttt{scripts/run\_pipeline\_gpt4o.py} respectively (a third client, for Claude Sonnet, is
+released alongside these two but was not run for the results reported below -- see
+Section~\ref{sec:limitations}). Both scripts share the same resumable-checkpoint pattern as the
+companion study's harnesses: results are written incrementally to CSV, a rerun with the same
+arguments skips already-completed (\texttt{sample\_id}, \texttt{representation}) pairs and retries
+only \texttt{ERROR} rows, so an interrupted run never re-spends already-paid-for API calls.
+
+The confirmatory run reported in Section~\ref{sec:results} used a 10-class subset of the CIC-IoT-2023
+taxonomy (\texttt{Benign\_Final}, \texttt{DDoS-HTTP\_Flood}, \texttt{DDoS-SYN\_Flood},
+\texttt{DDoS-SynonymousIP\_Flood}, \texttt{DNS\_Spoofing}, \texttt{DictionaryBruteForce},
+\texttt{MITM-ArpSpoofing}, \texttt{Mirai-greip\_flood}, \texttt{Mirai-udpplain},
+\texttt{SqlInjection}), 102 sampled windows per class ($n=1{,}020$ windows total, exactly balanced
+across classes) $\times$ 6 representations $=$ 6,120 API calls per model, 12,240 calls total across
+both models. Every call completed with zero \texttt{ERROR} rows for both models -- no representation
+or class has a reduced $n$ from retried failures. Real, confirmed cost: \$20.00 for an earlier
+Claude Sonnet 5 pilot at this same $n=1{,}020$ scale (used only to calibrate
+\texttt{EMPIRICAL\_COST\_PER\_CALL}, not included in the results below), and, for the two models
+actually reported, approximately \$15 (Qwen-vl-plus) and \$16 (GPT-4o-mini, confirmed real) for the
+full 6,120-call run each.
+
+\subsection{Grading and analysis}
+
+Classification accuracy and citation quality are graded with the exact same rubric as the companion
+study (\texttt{src/imgrep/grading.py}, reused with only cosmetic axis-label changes from
+``by condition'' to ``by representation'' -- the underlying \texttt{wilson\_ci()} and
+\texttt{grade\_citation()} logic is unchanged): every citation is graded
+\texttt{real-and-correct}, \texttt{real-but-generic}, \texttt{real-but-wrong-family},
+\texttt{no-citation}, \texttt{n/a-benign}, or \texttt{UNVERIFIED} against the same corpus, and every
+proportion reported uses a Wilson 95\% confidence interval~\cite{wilson1927} rather than a normal
+approximation. The primary comparison is real-and-correct citation rate among attack (non-benign)
+samples, broken out by representation, with non-overlapping confidence intervals between
+representations treated as the threshold for a representation effect large enough to matter
+practically. Classification accuracy by representation is reported as a secondary outcome, mirroring
+the companion study's finding that a grounding technique can leave citation quality and
+classification accuracy to move independently.
+
+\section{Results}
+\label{sec:results}
+
+All results below are computed directly from the real, completed harness output
+(\texttt{results\_1020/harness\_results\_gpt4o.csv} and
+\texttt{results\_1020/harness\_results\_qwen.csv}, zero \texttt{ERROR} rows in either file) by
+\texttt{scripts/generate\_figures.py}, using the same \texttt{wilson\_ci()} and
+\texttt{grade\_citation()} logic as \texttt{summary.txt}, so the figures, tables, and prose below
+cannot silently disagree with each other. $n=1{,}020$ per representation per model throughout;
+$n=918$ (non-benign) for citation-rate denominators.
+
+\subsection{Classification accuracy by representation}
+
+Figure~\ref{fig:accuracy} and Table~\ref{tab:accuracy} show a sharp two-cluster split that holds for
+both models. The three annotated representations (\texttt{four\_panel}, \texttt{single\_line},
+\texttt{heatmap}) sustain 42--80\% accuracy; the three unannotated/dimensionality-varying
+representations (\texttt{recurrence\_plot}, \texttt{grayscale\_matrix}, \texttt{rgb\_stack}) collapse
+to 9.7--11.1\% for both models -- statistically indistinguishable from the 10\% base rate of a
+balanced 10-class task. Confidence intervals do not overlap between the two clusters for either
+model. Within the annotated cluster the two models diverge: GPT-4o-mini favors \texttt{four\_panel}
+(71.9\%) over \texttt{single\_line} (41.8\%) and \texttt{heatmap} (44.7\%), while Qwen-vl-plus is
+roughly flat across all three (77.5--80.4\%, \texttt{heatmap} numerically highest). Annotation
+richness, not information content, appears to drive the accuracy cluster split: \texttt{single\_line}
+carries only one of fourteen feature channels yet performs like the fully annotated \texttt{heatmap}
+and \texttt{four\_panel} for both models, while \texttt{grayscale\_matrix} carries all fourteen
+channels yet performs at chance -- isolating annotation, not channel count, as the operative variable.
+
+\begin{table}[htbp]
+\centering
+\caption{Classification accuracy by representation, Wilson 95\% CI, $n=1{,}020$ per cell.}
+\label{tab:accuracy}
+\begin{tabular}{lcc}
+\toprule
+Representation & GPT-4o-mini & Qwen-vl-plus \\
+\midrule
+four\_panel        & 71.9\% [69.0--74.5\%] & 77.5\% [74.9--80.0\%] \\
+single\_line        & 41.8\% [38.8--44.8\%] & 79.4\% [76.8--81.8\%] \\
+heatmap             & 44.7\% [41.7--47.8\%] & 80.4\% [77.8--82.7\%] \\
+recurrence\_plot    & 9.8\% [8.1--11.8\%]   & 10.0\% [8.3--12.0\%]  \\
+grayscale\_matrix   & 9.7\% [8.0--11.7\%]   & 10.0\% [8.3--12.0\%]  \\
+rgb\_stack          & 11.1\% [9.3--13.2\%]  & 10.0\% [8.3--12.0\%]  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_accuracy_by_representation.png}
+\caption{Classification accuracy by representation and model, Wilson 95\% CI error bars. Dashed line
+marks the 10-class chance rate.}
+\label{fig:accuracy}
+\end{figure}
+
+\subsection{Citation quality by representation}
+
+Citation quality (Figure~\ref{fig:citation}, Table~\ref{tab:citation}) tracks the same two-cluster
+split as accuracy, but with a notable divergence: Qwen-vl-plus's citation quality on the annotated
+cluster is meaningfully \emph{better} than GPT-4o-mini's, most sharply on \texttt{heatmap} (61.7\% vs.
+31.4\%) and \texttt{single\_line} (55.8\% vs. 32.7\%), despite the two models' accuracy being closer
+on those same representations. On the unannotated cluster, both models converge to
+$\approx$11\%, again statistically at the level expected from citing the single most common attack
+family by chance in a 10-class corpus. One \texttt{grayscale\_matrix} citation from GPT-4o-mini
+returned an ID not in the verified corpus (\texttt{UNVERIFIED}, 3 of 1,020 rows) and was excluded
+from the real-and-correct denominator pending manual verification against MITRE/NVD.
+
+\begin{table}[htbp]
+\centering
+\caption{Real-and-correct citation rate among attack samples, Wilson 95\% CI, $n=918$ per cell.}
+\label{tab:citation}
+\begin{tabular}{lcc}
+\toprule
+Representation & GPT-4o-mini & Qwen-vl-plus \\
+\midrule
+four\_panel        & 49.5\% [46.2--52.7\%] & 51.7\% [48.5--55.0\%] \\
+single\_line        & 32.7\% [29.7--35.8\%] & 55.8\% [52.5--59.0\%] \\
+heatmap             & 31.4\% [28.5--34.4\%] & 61.7\% [58.5--64.7\%] \\
+recurrence\_plot    & 11.1\% [9.2--13.3\%]  & 11.1\% [9.2--13.3\%]  \\
+grayscale\_matrix   & 10.8\% [8.9--13.0\%]  & 11.1\% [9.2--13.3\%]  \\
+rgb\_stack          & 12.3\% [10.3--14.6\%] & 11.1\% [9.2--13.3\%]  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_citation_quality.png}
+\caption{Real-and-correct citation rate among attack samples, by representation and model, Wilson
+95\% CI error bars.}
+\label{fig:citation}
+\end{figure}
+
+\subsection{No-citation rate by representation, and Qwen-vl-plus's total collapse}
+\label{sec:no-citation}
+
+This is the sharpest finding in the study, and it runs directly counter to H2. If low annotation
+pushed models toward conservative, hedged responses, the \texttt{no-citation} rate should rise on
+the three unannotated representations. It does the opposite for both models. GPT-4o-mini's
+\texttt{no-citation} rate is 24.7\% on \texttt{four\_panel} and 42.2\% on \texttt{single\_line}, but
+falls to 2.1\% (\texttt{recurrence\_plot}), 16.2\% (\texttt{grayscale\_matrix}), and 0.5\%
+(\texttt{rgb\_stack}) -- the model volunteers \emph{more}, not fewer, citations when it can least
+support them, and 651--816 of every 1,020 unannotated-representation rows land in
+\texttt{real-but-wrong-family} rather than \texttt{no-citation}.
+
+Qwen-vl-plus shows the same pattern in its most extreme possible form. Its \texttt{no-citation} rate
+on the unannotated cluster is exactly \textbf{0.0\%} across all three representations (0 of 1,020
+rows each) -- and inspecting the raw predictions shows why: on \texttt{recurrence\_plot},
+\texttt{grayscale\_matrix}, and \texttt{rgb\_stack} alike, Qwen-vl-plus predicts the identical class
+(\texttt{DDoS-SYN\_Flood}) and cites the identical reference (\texttt{CAPEC-482}) on every single one
+of the 3,060 calls, independent of the true class or the actual image content. The
+citation-grade breakdown is identical across all three representations: 816 \texttt{real-but-wrong-family}
+(the 816 non-\texttt{DDoS-SYN\_Flood}, non-benign samples), 102 \texttt{n/a-benign} (the benign
+samples, correctly excluded from grading), and 102 \texttt{real-and-correct} -- which is not evidence
+of 102 correct classifications so much as the model happening to be right exactly when the true class
+is \texttt{DDoS-SYN\_Flood} (102 of 1,020 samples, matching the class's balanced share). This is total
+output collapse, not degraded-but-varied performance: the model produces zero visual information from
+these three representations and instead emits one fixed, maximally confident answer regardless of
+input.
+
+Both findings support the same conclusion: under low-annotation representations, both models fail by
+confident fabrication, not by honest hedging. This is direct evidence for a fabrication-under-uncertainty
+mechanism (a variant of H1) over the elaboration/over-hedging mechanism (H2) -- stripping visual
+annotation does not make either model more conservative, it makes both models guess with undiminished,
+and in Qwen-vl-plus's case totally undifferentiated, confidence.
+
+\section{Discussion}
+\label{sec:discussion}
+
+The results do not support a monotonic annotation gradient; they support a binary threshold. Both
+models treat \texttt{four\_panel}, \texttt{single\_line}, and \texttt{heatmap} as members of one
+functional cluster and \texttt{recurrence\_plot}, \texttt{grayscale\_matrix}, and \texttt{rgb\_stack}
+as members of a second, regardless of how much information or how many channels each representation
+actually carries -- \texttt{single\_line}'s single channel performs like \texttt{heatmap}'s fourteen,
+and \texttt{grayscale\_matrix}'s fourteen channels perform like nothing at all. This is the cleanest
+possible separation of an annotation effect from an information effect that the study's design set
+out to find: annotation, not channel count, is what determines whether the model can use an image at
+all. \texttt{rgb\_stack} -- the representation that varies dimensionality rather than annotation
+richness -- patterns entirely with the other two unannotated representations rather than forming a
+distinct third cluster, for both models. That is itself informative: a genuinely 3-dimensional
+(height $\times$ width $\times$ channel) encoding earns the model no more purchase than a 2D grayscale
+grid once textual annotation is removed, suggesting dimensionality is not the operative variable
+either -- annotation is.
+
+The two models diverge sharply within the annotated cluster (GPT-4o-mini favors \texttt{four\_panel}
+specifically; Qwen-vl-plus performs comparably well on all three annotated representations, and
+matches or beats GPT-4o-mini's citation quality on every one of them), which mirrors the companion
+study's finding that a technique's effect can be model-dependent even when the underlying
+qualitative pattern (here, the annotated/unannotated split) replicates across models. But the
+Section~\ref{sec:no-citation} finding -- that neither model's \texttt{no-citation} rate rises on the
+unannotated cluster, and that Qwen-vl-plus's failure mode there is a single, fixed, maximally
+confident wrong answer repeated across all 3,060 calls -- is the study's most actionable result, and
+it replicates in the same direction for both models despite their otherwise different behavior. This
+directly rejects H2 as the operative mechanism in this setting: an elaboration-driven hallucination
+story predicts hedging under uncertainty, and neither model hedges. It instead supports a
+fabrication-under-uncertainty account (a variant of H1): when a multimodal LLM cannot visually parse
+an image, it does not become more cautious, it becomes uniformly, confidently wrong -- the specific
+failure mode a citation-grounded security pipeline most needs to detect, because it is
+indistinguishable from a correct, confident answer without independently verifying the citation
+against the corpus, exactly the check this study's grading rubric performs and a naive
+accuracy-only evaluation would miss entirely.
+
+\section{Limitations}
+\label{sec:limitations}
+
+This paper's central limitation, stated plainly, is scope on two axes. First, models: the
+confirmatory results in Section~\ref{sec:results} cover GPT-4o-mini and Qwen-vl-plus only. A Claude
+Sonnet 5 client (\texttt{src/imgrep/claude\_client.py}) is released alongside these two and was
+pilot-tested at this study's $n=1{,}020$ scale (real, confirmed cost \$20.00) to calibrate cost
+estimates, but a full confirmatory Claude Sonnet run against this specific 10-class manifest was not
+completed for this paper -- Qwen-vl-plus was substituted as the second model primarily on cost
+grounds (approximately \$15 vs. \$120 for a full 6,120-call run, real observed rates for both). The
+qualitative pattern reported here (annotated/unannotated cluster split, no-citation rate falling
+rather than rising under low annotation) should be treated as established for two models, not three,
+until a Claude Sonnet leg is added. Second, classes: the confirmatory run used a 10-class subset of
+CIC-IoT-2023 (Section~\ref{sec:methods}) rather than the full taxonomy; extending to the full class
+set is future work and could reveal representation effects specific to attack families not sampled
+here. Beyond that: the six representations were chosen to span an annotation
+gradient plus one dimensionality axis using established, precedented encodings
+(Sections~\ref{sec:representations} and~\ref{sec:related}), but they are not an exhaustive space of
+possible traffic-image encodings, and a null or small effect across these six would not rule out a
+larger effect from a representation not tested here. The recurrence-plot, grayscale-matrix, and
+rgb-stack representations' per-feature normalization is computed per-window rather than against a
+corpus-wide reference distribution, so extreme windows may normalize differently than a deployed
+system using a fixed normalization would; this matches the companion study's per-window rendering
+convention but is worth flagging as a modeling choice. \texttt{rgb\_stack}'s blue channel is
+additionally zero-padded (two real feature columns padded to six to match the other channels'
+width), which introduces a fixed, uninformative region of every image that is not present in any
+other representation -- worth checking as a possible confound if \texttt{rgb\_stack} behaves
+differently from the rest. Finally, as in the companion study, GPT-4o-mini API calls may fail transiently
+(rate limits, timeouts); such failures are logged as \texttt{ERROR} rows and automatically retried on
+rerun via the resumable-checkpoint design, but a final reported $n$ per representation may be
+slightly uneven across representations if some fail more persistently than others, and this should
+be reported explicitly alongside the accuracy/citation tables in Section~\ref{sec:results} rather
+than silently excluded.
+
+\section{Conclusion}
+
+Citation-grounded multimodal LLM classification of network traffic has been shown to reduce
+citation hallucination through prompting-level grounding, but whether that benefit is robust to how
+the underlying traffic is visually encoded has not been studied. This paper isolates image
+representation as an independent variable -- holding prompting condition, dataset, models, citation
+corpus, and grading rubric fixed -- across a deliberate five-way annotation gradient from a fully
+labeled composite chart to a raw, unannotated numeric-to-pixel image, plus a sixth, genuinely
+3-dimensional RGB-stack encoding, and releases working, resumable, dual-model experiment code so the
+question can be answered empirically. Against a real, completed $n=1{,}020$ run on CIC-IoT-2023, the
+answer is that image representation matters enormously, but through a binary annotated/unannotated
+threshold rather than a smooth gradient, and the failure mode under the unannotated threshold is
+confident fabrication rather than honest hedging for both models tested -- a representation choice
+that looks cosmetic can silently convert a citation-grounded pipeline's output from mostly correct to
+uniformly, confidently wrong.
+
+\section*{Acknowledgments}
+
+The authors thank the University of San Diego's Copley Library for institutional support.
+
+\section*{Declarations}
+
+\textbf{Funding.} No external funding was received for this study.\\
+\textbf{Conflict of interest.} The authors declare no conflicts of interest.\\
+\textbf{Data and code availability.} The six-representation rendering code, fixed RAG-grounded
+prompting harness, citation corpus, grading rubric, all three model-calling scripts, and the real
+result CSVs (\texttt{harness\_results\_gpt4o.csv}, \texttt{harness\_results\_qwen.csv}, $n=6{,}120$
+rows each) are released alongside this paper's arXiv submission. A permanent archival DOI (e.g. via
+Zenodo or OSF) will be added in a future revision once the dataset is formally archived.\\
+\textbf{Authors' contributions.} G.S.S. conceived and designed the study, built the experimental
+pipeline (six representation renderers, prompting harness, three model clients, grading and figure
+generation), ran the GPT-4o-mini and Qwen-vl-plus confirmatory experiments, performed the analysis,
+and wrote the manuscript. P.S.U. contributed to the experimental design and documentation of the
+methodology, consistent with the companion study's convention. Both authors reviewed and approved
+the final manuscript.
+
+\begin{thebibliography}{9}
+
+\bibitem{groundingcitation2026}
+G.~S.~Shiva, P.~S.~Umakanth.
+\textit{Grounding Reduces Citation Hallucination in Multimodal LLM Zero-Shot Classification of
+IoT-Botnet Traffic -- A Two-Model Confirmatory Study}. Submitted, 2026.
+
+\bibitem{cic-iot-2023}
+E.~C.~P. Neto, S.~Dadkhah, R.~Ferreira, A.~Zohourian, R.~Lu, A.~A. Ghorbani.
+\textit{CICIoT2023: A real-time dataset and benchmark for large-scale attacks in IoT
+environment}. Sensors, 23(13):5941, 2023.
+
+\bibitem{lewis2020retrieval}
+P.~Lewis et al.
+\textit{Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks}.
+NeurIPS 2020.
+
+\bibitem{wilson1927}
+E.~B. Wilson.
+\textit{Probable inference, the law of succession, and statistical inference}.
+Journal of the American Statistical Association, 22(158):209--212, 1927.
+
+\bibitem{adaptivedistraction2025}
+\textit{Adaptive Distraction: Probing LLM Contextual Robustness with Automated Tree Search}.
+arXiv:2502.01609, 2025.
+
+\bibitem{factum2026}
+\textit{FACTUM: Mechanistic Detection of Citation Hallucination in Long-Form RAG}.
+arXiv:2601.05866, 2026.
+
+\bibitem{wang2015gaf}
+Z.~Wang, T.~Oates.
+\textit{Imaging Time-Series to Improve Classification and Imputation}.
+arXiv:1506.00327, 2015.
+
+\bibitem{nataraj2011malware}
+L.~Nataraj, S.~Karthikeyan, G.~Jacob, B.~S.~Manjunath.
+\textit{Malware Images: Visualization and Automatic Classification}.
+Proceedings of the 8th International Symposium on Visualization for Cyber Security (VizSec), 2011.
+
+\bibitem{wirelessimaging2021}
+\textit{Resource-aware Time Series Imaging Classification for Wireless Link Layer Anomalies}.
+arXiv:2104.00972, 2021.
+
+\bibitem{byteflow2026}
+\textit{A Novel Byte-Level Flow-to-Image Encoding Method for Network Intrusion Detection Systems}.
+arXiv:2605.05275, 2026.
+
+\bibitem{bijective2025}
+\textit{Bijective Network-to-Image Encoding for Interpretable CNN-Based Intrusion Detection System}.
+Network, 5(4):42, MDPI, 2025.
+
+\bibitem{mllmhallucsurvey2024}
+Z.~Liu et al.
+\textit{Hallucination of Multimodal Large Language Models: A Survey}.
+arXiv:2404.18930, 2024.
+
+\end{thebibliography}
+
+\end{document}

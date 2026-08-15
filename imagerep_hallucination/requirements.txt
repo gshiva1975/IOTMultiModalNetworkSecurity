@@ -1,0 +1,8 @@
+anthropic>=0.40.0
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+
+# Optional -- only needed if you run scripts/run_pipeline_gpt4o.py for a
+# cross-model comparison. Not required for the core Claude pipeline.
+openai>=1.40.0
