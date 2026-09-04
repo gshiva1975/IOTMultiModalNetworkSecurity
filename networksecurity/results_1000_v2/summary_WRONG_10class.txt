@@ -1,0 +1,40 @@
+=== Claude classification accuracy by condition (Wilson 95% CI) ===
+   cve_text_grounded: 29.1% [24.3-34.4%] (n=309)
+               naive: 35.1% [29.9-40.5%] (n=308)
+        rag_grounded: 32.4% [27.4-37.8%] (n=306)
+
+=== Citation quality by condition (counts, and 95% CI on 'real-and-correct' rate among attack samples) ===
+
+  cve_text_grounded:
+  citation_grade
+  real-but-wrong-family    143
+  real-and-correct          70
+  no-citation               47
+  n/a-benign                39
+  real-but-generic          10
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 25.9% [21.1-31.5%] (n=270)
+
+  naive:
+  citation_grade
+  no-citation              103
+  real-but-wrong-family     86
+  real-and-correct          42
+  real-but-generic          39
+  n/a-benign                38
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 15.6% [11.7-20.4%] (n=270)
+
+  rag_grounded:
+  citation_grade
+  real-but-wrong-family    127
+  real-and-correct          78
+  no-citation               63
+  n/a-benign                36
+  real-but-generic           2
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 28.9% [23.8-34.6%] (n=270)
+
+=== Non-LLM baseline detectors (Wilson 95% CI on recall) ===
+   Rolling z-score: acc=0.39 precision=1.00 recall=32.6% [27.3-38.4%] (n=270) f1=0.49 (TP=88 FP=0 FN=182 TN=30)
+  Isolation Forest: acc=0.65 precision=1.00 recall=61.5% [55.6-67.1%] (n=270) f1=0.76 (TP=166 FP=0 FN=104 TN=30)

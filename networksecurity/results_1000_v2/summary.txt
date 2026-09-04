@@ -1,42 +1,46 @@
 === Claude classification accuracy by condition (Wilson 95% CI) ===
-   cve_text_grounded: 90.7% [88.7-92.3%] (n=964)
-               naive: 98.6% [97.6-99.2%] (n=913)
-        rag_grounded: 70.5% [67.6-73.2%] (n=1020)
+   cve_text_grounded: 16.5% [14.3-18.9%] (n=1020)
+               naive: 17.2% [15.0-19.6%] (n=1020)
+        rag_grounded: 15.0% [12.9-17.3%] (n=1020)
 
 === Citation quality by condition (counts, and 95% CI on 'real-and-correct' rate among attack samples) ===
 
   cve_text_grounded:
   citation_grade
-  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)    509
-  real-but-wrong-family                                                                         274
-  real-but-generic                                                                               74
-  no-citation                                                                                    74
+  real-but-wrong-family                                                                         327
+  real-but-generic                                                                              250
+  no-citation                                                                                   225
+  real-and-correct                                                                              187
   n/a-benign                                                                                     30
-  real-and-correct                                                                                3
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)      1
   Name: count, dtype: int64
-  -> real-and-correct rate among attack samples: 0.3% [0.1-0.9%] (n=934)
-  -> WARNING: 509 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+  -> real-and-correct rate among attack samples: 18.9% [16.6-21.4%] (n=990)
+  -> WARNING: 1 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
 
   naive:
   citation_grade
-  no-citation                                                                                   375
-  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)    285
-  real-but-wrong-family                                                                         178
-  real-but-generic                                                                               42
+  real-but-wrong-family                                                                         317
+  no-citation                                                                                   280
+  real-but-generic                                                                              220
+  real-and-correct                                                                              172
   n/a-benign                                                                                     30
-  real-and-correct                                                                                3
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)      1
   Name: count, dtype: int64
-  -> real-and-correct rate among attack samples: 0.3% [0.1-1.0%] (n=883)
-  -> WARNING: 285 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+  -> real-and-correct rate among attack samples: 17.4% [15.1-19.9%] (n=990)
+  -> WARNING: 1 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
 
   rag_grounded:
   citation_grade
-  real-and-correct                                                                              565
-  real-but-wrong-family                                                                         197
-  no-citation                                                                                   132
-  real-but-generic                                                                               94
+  real-but-wrong-family                                                                         591
+  real-and-correct                                                                              266
+  no-citation                                                                                   131
   n/a-benign                                                                                     30
-  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)      2
+  real-but-generic                                                                                1
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)      1
   Name: count, dtype: int64
-  -> real-and-correct rate among attack samples: 57.1% [54.0-60.1%] (n=990)
-  -> WARNING: 2 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+  -> real-and-correct rate among attack samples: 26.9% [24.2-29.7%] (n=990)
+  -> WARNING: 1 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+
+=== Non-LLM baseline detectors (Wilson 95% CI on recall) ===
+   Rolling z-score: acc=0.30 precision=1.00 recall=28.4% [25.7-31.3%] (n=990) f1=0.44 (TP=281 FP=0 FN=709 TN=30)
+  Isolation Forest: acc=0.56 precision=1.00 recall=54.2% [51.1-57.3%] (n=990) f1=0.70 (TP=537 FP=0 FN=453 TN=30)

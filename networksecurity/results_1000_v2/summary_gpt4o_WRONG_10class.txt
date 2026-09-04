@@ -1,0 +1,35 @@
+=== GPT-4o classification accuracy by condition (Wilson 95% CI) ===
+   cve_text_grounded: 10.0% [7.1-13.9%] (n=300)
+               naive: 10.3% [7.4-14.3%] (n=300)
+        rag_grounded: 10.0% [7.1-13.9%] (n=300)
+
+=== Citation quality by condition (counts, and 95% CI on 'real-and-correct' rate among attack samples) ===
+
+  cve_text_grounded:
+  citation_grade
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)    234
+  real-but-wrong-family                                                                          34
+  n/a-benign                                                                                     30
+  no-citation                                                                                     2
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 0.0% [0.0-1.4%] (n=270)
+  -> WARNING: 234 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+
+  naive:
+  citation_grade
+  no-citation                                                                                   213
+  UNVERIFIED (not yet checked against MITRE/NVD -- verify manually before citing in a paper)     39
+  n/a-benign                                                                                     30
+  real-but-wrong-family                                                                          14
+  real-but-generic                                                                                4
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 0.0% [0.0-1.4%] (n=270)
+  -> WARNING: 39 citation(s) reference an ID not in the verified corpus -- check these against capec.mitre.org/nvd.nist.gov before treating them as fabricated OR as correct.
+
+  rag_grounded:
+  citation_grade
+  real-but-wrong-family    240
+  n/a-benign                30
+  real-and-correct          30
+  Name: count, dtype: int64
+  -> real-and-correct rate among attack samples: 11.1% [7.9-15.4%] (n=270)

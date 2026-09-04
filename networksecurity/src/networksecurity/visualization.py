@@ -38,7 +38,13 @@ def make_panel(df_slice, class_name, sample_id):
     x = np.arange(len(df_slice))
     axes[0].plot(x, df_slice["Rate"].to_numpy(), color="#c53030", linewidth=1.2)
     axes[0].set_ylabel("Rate (pkt/s)")
-    axes[0].set_title(f"{class_name} — sample {sample_id}", fontsize=10)
+    # NOTE: the ground-truth class name / sample id was previously printed as
+    # a visible plot title here (`axes[0].set_title(f"{class_name} — sample
+    # {sample_id}")`). That leaked the label directly into the image the
+    # model classifies and was removed after an audit found the identical
+    # bug in the imagerep_hallucination companion study. class_name and
+    # sample_id are kept as parameters (used for the manifest row only) so
+    # the caller's signature and the returned figure's data are unchanged.
     for c in FLAG_COLS:
         axes[1].plot(x, df_slice[c].to_numpy(), linewidth=1.0, label=c.replace("_flag_number", ""))
     axes[1].set_ylabel("TCP flag frac.")
